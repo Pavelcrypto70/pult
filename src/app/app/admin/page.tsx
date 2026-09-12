@@ -9,13 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
   Table,
@@ -39,7 +32,6 @@ const integrations = [
 
 export default function AdminPage() {
   const {
-    ready,
     state,
     currentUser,
     grantCreateAccess,
@@ -72,23 +64,20 @@ export default function AdminPage() {
         description="Выдавайте доступ на создание компаний и управляйте командой пространства."
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <Select
-              value={state.currentUserId}
-              onValueChange={(value) => {
-                if (value) setCurrentUser(value);
-              }}
-            >
-              <SelectTrigger className="w-[210px] rounded-full bg-white/80">
-                <SelectValue placeholder="Текущий пользователь" />
-              </SelectTrigger>
-              <SelectContent>
+            <label className="flex items-center gap-2 rounded-full border border-[var(--pult-line)] bg-white/80 px-3 py-1.5 text-sm">
+              <span className="text-xs text-muted-foreground">Я:</span>
+              <select
+                className="bg-transparent outline-none"
+                value={state.currentUserId}
+                onChange={(event) => setCurrentUser(event.target.value)}
+              >
                 {team.map((member) => (
-                  <SelectItem key={member.id} value={member.id}>
+                  <option key={member.id} value={member.id}>
                     {member.name}
-                  </SelectItem>
+                  </option>
                 ))}
-              </SelectContent>
-            </Select>
+              </select>
+            </label>
             <Button
               className="rounded-full bg-[var(--pult-accent)] px-5 text-white hover:bg-[var(--pult-accent)]/90"
               render={<Link href="/app/companies" />}
@@ -100,172 +89,169 @@ export default function AdminPage() {
         }
       />
 
-      {!ready ? (
-        <Surface className="p-6 text-sm text-muted-foreground">Загрузка…</Surface>
-      ) : (
-        <Tabs defaultValue="companies">
-          <TabsList className="mb-4 rounded-full bg-white/70 p-1 shadow-[var(--pult-shadow)]">
-            <TabsTrigger value="companies" className="rounded-full">
-              Доступ к компаниям
-            </TabsTrigger>
-            <TabsTrigger value="people" className="rounded-full">
-              Команда
-            </TabsTrigger>
-            <TabsTrigger value="access" className="rounded-full">
-              Роли
-            </TabsTrigger>
-            <TabsTrigger value="integrations" className="rounded-full">
-              Интеграции
-            </TabsTrigger>
-            <TabsTrigger value="audit" className="rounded-full">
-              Журнал
-            </TabsTrigger>
-          </TabsList>
+      <Tabs defaultValue="companies">
+        <TabsList className="mb-4 rounded-full bg-white/70 p-1 shadow-[var(--pult-shadow)]">
+          <TabsTrigger value="companies" className="rounded-full">
+            Доступ к компаниям
+          </TabsTrigger>
+          <TabsTrigger value="people" className="rounded-full">
+            Команда
+          </TabsTrigger>
+          <TabsTrigger value="access" className="rounded-full">
+            Роли
+          </TabsTrigger>
+          <TabsTrigger value="integrations" className="rounded-full">
+            Интеграции
+          </TabsTrigger>
+          <TabsTrigger value="audit" className="rounded-full">
+            Журнал
+          </TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="companies" className="space-y-4">
-            <Surface className="p-5">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="max-w-2xl">
-                  <div className="mb-2 inline-flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] text-[var(--pult-accent)] uppercase">
-                    <ShieldCheck className="size-3.5" />
-                    Право на создание
-                  </div>
-                  <h2 className="font-[family-name:var(--font-display)] text-xl tracking-tight">
-                    Кому можно создавать компании
-                  </h2>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    Админ выдаёт доступ. Потом у человека появляется конструктор:
-                    он включает только нужные модули, поля, стадии, роли и
-                    автоматизации.
-                  </p>
+        <TabsContent value="companies" className="space-y-4">
+          <Surface className="p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="max-w-2xl">
+                <div className="mb-2 inline-flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] text-[var(--pult-accent)] uppercase">
+                  <ShieldCheck className="size-3.5" />
+                  Право на создание
                 </div>
-                <Badge
-                  className={
-                    isAdmin
-                      ? "bg-[var(--pult-accent-soft)] text-[var(--pult-accent)]"
-                      : "bg-secondary text-muted-foreground"
-                  }
+                <h2 className="font-[family-name:var(--font-display)] text-xl tracking-tight">
+                  Кому можно создавать компании
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  Админ выдаёт доступ. Потом у человека появляется конструктор:
+                  он включает только нужные модули, поля, стадии, роли и
+                  автоматизации.
+                </p>
+              </div>
+              <Badge
+                className={
+                  isAdmin
+                    ? "bg-[var(--pult-accent-soft)] text-[var(--pult-accent)]"
+                    : "bg-secondary text-muted-foreground"
+                }
+              >
+                Вы: {ROLE_LABELS[currentUser.role]}
+              </Badge>
+            </div>
+          </Surface>
+
+          {!isAdmin ? (
+            <Surface className="p-5 text-sm text-muted-foreground">
+              Переключитесь на владельца или админа, чтобы выдавать доступ.
+              Сейчас вы — {currentUser.name}.
+            </Surface>
+          ) : (
+            <Surface className="overflow-hidden">
+              <div className="border-b border-[var(--pult-line)] p-4">
+                <Input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Найти человека…"
+                  className="max-w-sm bg-white"
+                />
+              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Сотрудник</TableHead>
+                    <TableHead>Роль</TableHead>
+                    <TableHead className="hidden md:table-cell">Email</TableHead>
+                    <TableHead className="text-right">Создание компаний</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((member) => {
+                    const hasAccess =
+                      member.role === "owner" ||
+                      member.role === "admin" ||
+                      accessIds.has(member.id);
+                    const locked =
+                      member.role === "owner" || member.role === "admin";
+                    return (
+                      <TableRow key={member.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <span className="flex size-8 items-center justify-center rounded-full bg-[var(--pult-accent-soft)] text-xs font-semibold text-[var(--pult-accent)]">
+                              {member.initials}
+                            </span>
+                            <span className="font-medium">{member.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{ROLE_LABELS[member.role]}</TableCell>
+                        <TableCell className="hidden text-muted-foreground md:table-cell">
+                          {member.email}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="inline-flex items-center gap-3">
+                            {hasAccess ? (
+                              <Badge className="bg-[var(--pult-accent-soft)] text-[var(--pult-accent)]">
+                                <Check className="size-3" />
+                                Можно
+                              </Badge>
+                            ) : (
+                              <Badge variant="secondary">Нет</Badge>
+                            )}
+                            <Label className="inline-flex cursor-pointer items-center gap-2 text-sm">
+                              <Checkbox
+                                checked={hasAccess}
+                                disabled={locked || !member.active}
+                                onCheckedChange={(checked) => {
+                                  if (locked) return;
+                                  if (checked) grantCreateAccess(member.id);
+                                  else revokeCreateAccess(member.id);
+                                }}
+                              />
+                              {locked ? "По роли" : "Выдать"}
+                            </Label>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </Surface>
+          )}
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Surface className="p-5">
+              <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+                <Building2 className="size-4 text-[var(--pult-accent)]" />
+                Компании в пространстве
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Сейчас: {state.companies.length}. Откройте список или соберите
+                новую через конструктор.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  className="rounded-full"
+                  render={<Link href="/app/companies" />}
                 >
-                  Вы: {ROLE_LABELS[currentUser.role]}
-                </Badge>
+                  Все компании
+                </Button>
+                <Button
+                  className="rounded-full bg-[var(--pult-ink)] text-[var(--pult-paper)] hover:bg-[var(--pult-ink)]/90"
+                  render={<Link href="/app/companies/new" />}
+                >
+                  <Wand2 className="size-4" />
+                  Конструктор
+                </Button>
               </div>
             </Surface>
-
-            {!isAdmin ? (
-              <Surface className="p-5 text-sm text-muted-foreground">
-                Переключитесь на владельца или админа, чтобы выдавать доступ.
-                Сейчас вы — {currentUser.name}.
-              </Surface>
-            ) : (
-              <Surface className="overflow-hidden">
-                <div className="border-b border-[var(--pult-line)] p-4">
-                  <Input
-                    value={query}
-                    onChange={(event) => setQuery(event.target.value)}
-                    placeholder="Найти человека…"
-                    className="max-w-sm bg-white"
-                  />
-                </div>
-                <Table>
-                  <TableHeader>
-                    <TableRow className="hover:bg-transparent">
-                      <TableHead>Сотрудник</TableHead>
-                      <TableHead>Роль</TableHead>
-                      <TableHead className="hidden md:table-cell">Email</TableHead>
-                      <TableHead className="text-right">Создание компаний</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filtered.map((member) => {
-                      const hasAccess =
-                        member.role === "owner" ||
-                        member.role === "admin" ||
-                        accessIds.has(member.id);
-                      const locked =
-                        member.role === "owner" || member.role === "admin";
-                      return (
-                        <TableRow key={member.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <span className="flex size-8 items-center justify-center rounded-full bg-[var(--pult-accent-soft)] text-xs font-semibold text-[var(--pult-accent)]">
-                                {member.initials}
-                              </span>
-                              <span className="font-medium">{member.name}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>{ROLE_LABELS[member.role]}</TableCell>
-                          <TableCell className="hidden text-muted-foreground md:table-cell">
-                            {member.email}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="inline-flex items-center gap-3">
-                              {hasAccess ? (
-                                <Badge className="bg-[var(--pult-accent-soft)] text-[var(--pult-accent)]">
-                                  <Check className="size-3" />
-                                  Можно
-                                </Badge>
-                              ) : (
-                                <Badge variant="secondary">Нет</Badge>
-                              )}
-                              <Label className="inline-flex cursor-pointer items-center gap-2 text-sm">
-                                <Checkbox
-                                  checked={hasAccess}
-                                  disabled={locked || !member.active}
-                                  onCheckedChange={(checked) => {
-                                    if (locked) return;
-                                    if (checked) grantCreateAccess(member.id);
-                                    else revokeCreateAccess(member.id);
-                                  }}
-                                />
-                                {locked ? "По роли" : "Выдать"}
-                              </Label>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </Surface>
-            )}
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <Surface className="p-5">
-                <div className="mb-2 flex items-center gap-2 text-sm font-medium">
-                  <Building2 className="size-4 text-[var(--pult-accent)]" />
-                  Компании в пространстве
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Сейчас: {state.companies.length}. Откройте список или соберите
-                  новую через конструктор.
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    className="rounded-full"
-                    render={<Link href="/app/companies" />}
-                  >
-                    Все компании
-                  </Button>
-                  <Button
-                    className="rounded-full bg-[var(--pult-ink)] text-[var(--pult-paper)] hover:bg-[var(--pult-ink)]/90"
-                    render={<Link href="/app/companies/new" />}
-                  >
-                    <Wand2 className="size-4" />
-                    Конструктор
-                  </Button>
-                </div>
-              </Surface>
-              <Surface className="p-5">
-                <div className="mb-2 text-sm font-medium">Как это работает</div>
-                <ol className="space-y-2 text-sm text-muted-foreground">
-                  <li>1. Админ выдаёт человеку право «создание компаний».</li>
-                  <li>2. Человек создаёт компанию и включает только нужные модули.</li>
-                  <li>3. В конструкторе добавляет поля, стадии, роли, страницы и автоматизации.</li>
-                </ol>
-              </Surface>
-            </div>
-          </TabsContent>
+            <Surface className="p-5">
+              <div className="mb-2 text-sm font-medium">Как это работает</div>
+              <ol className="space-y-2 text-sm text-muted-foreground">
+                <li>1. Админ выдаёт человеку право «создание компаний».</li>
+                <li>2. Человек создаёт компанию и включает только нужные модули.</li>
+                <li>3. В конструкторе добавляет поля, стадии, роли, страницы и автоматизации.</li>
+              </ol>
+            </Surface>
+          </div>
+        </TabsContent>
 
           <TabsContent value="people">
             <Surface className="overflow-hidden">
@@ -410,7 +396,6 @@ export default function AdminPage() {
             </Surface>
           </TabsContent>
         </Tabs>
-      )}
     </div>
   );
 }

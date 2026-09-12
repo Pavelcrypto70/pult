@@ -48,40 +48,56 @@ function buildDemoCompany(): Company {
   };
 }
 
-const defaultState: WorkspaceState = {
+export const defaultWorkspaceState: WorkspaceState = {
   access: [{ userId: "u2", grantedBy: "u1", grantedAt: "2026-09-10" }],
   companies: [buildDemoCompany()],
   currentUserId: "u1",
 };
 
 function loadState(): WorkspaceState {
-  if (typeof window === "undefined") return defaultState;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultState;
-    const parsed = JSON.parse(raw) as WorkspaceState;
-    if (!Array.isArray(parsed.companies) || !Array.isArray(parsed.access)) {
-      return defaultState;
-    }
-    return { ...defaultState, ...parsed };
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultWorkspaceState;
+    const parsed = JSON.parse(raw) as Partial<WorkspaceState>;
+    return {
+      access: Array.isArray(parsed.access)
+        ? parsed.access
+        : defaultWorkspaceState.access,
+      companies: Array.isArray(parsed.companies)
+        ? parsed.companies
+        : defaultWorkspaceState.companies,
+      currentUserId:
+        typeof parsed.currentUserId === "string"
+          ? parsed.currentUserId
+          : defaultWorkspaceState.currentUserId,
+    };
   } catch {
-    return defaultState;
+    return defaultWorkspaceState;
+  }
+}
+
+function saveState(state: WorkspaceState) {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // ignore quota / private mode
   }
 }
 
 export function useWorkspace() {
-  const [state, setState] = useState<WorkspaceState>(defaultState);
-  const [ready, setReady] = useState(false);
+  const [state, setState] = useState<WorkspaceState>(defaultWorkspaceState);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setState(loadState());
-    setReady(true);
+    const next = loadState();
+    setState(next);
+    setHydrated(true);
   }, []);
 
   useEffect(() => {
-    if (!ready) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state, ready]);
+    if (!hydrated) return;
+    saveState(state);
+  }, [state, hydrated]);
 
   const currentUser = team.find((m) => m.id === state.currentUserId) ?? team[0];
 
@@ -161,7 +177,8 @@ export function useWorkspace() {
   }, []);
 
   return {
-    ready,
+    hydrated,
+    ready: true,
     state,
     currentUser,
     grantCreateAccess,

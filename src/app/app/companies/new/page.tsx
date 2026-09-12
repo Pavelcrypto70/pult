@@ -13,7 +13,7 @@ import { canUserCreateCompany } from "@/lib/company";
 
 export default function NewCompanyPage() {
   const router = useRouter();
-  const { ready, state, currentUser, createCompany } = useWorkspace();
+  const { state, currentUser, createCompany } = useWorkspace();
   const canCreate = canUserCreateCompany(
     currentUser.role,
     state.access,
@@ -31,10 +31,6 @@ export default function NewCompanyPage() {
       customPages: draft.customPages,
     });
     router.push(`/app/companies/${company.id}`);
-  }
-
-  if (!ready) {
-    return <Surface className="p-6 text-sm text-muted-foreground">Загрузка…</Surface>;
   }
 
   if (!canCreate) {

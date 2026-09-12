@@ -10,7 +10,7 @@ import { canUserCreateCompany } from "@/lib/company";
 import { team } from "@/lib/mock-data";
 
 export default function CompaniesPage() {
-  const { ready, state, currentUser, deleteCompany } = useWorkspace();
+  const { state, currentUser, deleteCompany } = useWorkspace();
   const canCreate = canUserCreateCompany(
     currentUser.role,
     state.access,
@@ -40,9 +40,7 @@ export default function CompaniesPage() {
         }
       />
 
-      {!ready ? (
-        <Surface className="p-6 text-sm text-muted-foreground">Загрузка…</Surface>
-      ) : !canCreate ? (
+      {!canCreate ? (
         <Surface className="p-6">
           <h2 className="font-[family-name:var(--font-display)] text-xl">
             Пока нельзя создать компанию

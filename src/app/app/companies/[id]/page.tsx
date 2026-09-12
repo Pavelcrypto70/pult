@@ -15,7 +15,7 @@ import { slugify } from "@/lib/company";
 export default function CompanyDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { ready, state, updateCompany } = useWorkspace();
+  const { state, updateCompany } = useWorkspace();
   const company = state.companies.find((item) => item.id === params.id);
 
   function handleSubmit(draft: CompanyDraft) {
@@ -32,10 +32,6 @@ export default function CompanyDetailPage() {
       customPages: draft.customPages,
     });
     router.push("/app/companies");
-  }
-
-  if (!ready) {
-    return <Surface className="p-6 text-sm text-muted-foreground">Загрузка…</Surface>;
   }
 
   if (!company) {
