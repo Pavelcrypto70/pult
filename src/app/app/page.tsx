@@ -24,11 +24,15 @@ export default function DashboardPage() {
         description="Утренний срез студии: что горит, где деньги и кто перегружен."
         actions={
           <>
-            <Button variant="outline" render={<Link href="/app/pipeline" />}>
+            <Button
+              variant="outline"
+              className="rounded-full border-[var(--pult-line)] bg-white/80"
+              render={<Link href="/app/pipeline" />}
+            >
               Воронка
             </Button>
             <Button
-              className="bg-[var(--pult-ink)] text-[var(--pult-paper)] hover:bg-[var(--pult-ink)]/90"
+              className="rounded-full bg-[var(--pult-ink)] px-5 text-[var(--pult-paper)] hover:bg-[var(--pult-ink)]/90"
               render={<Link href="/app/tasks" />}
             >
               Задачи
@@ -45,10 +49,10 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-        <Surface className="p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-[family-name:var(--font-display)] text-lg">Активные сделки</h2>
-            <Badge variant="secondary">{openDeals.length}</Badge>
+        <Surface className="p-5 sm:p-6">
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="font-[family-name:var(--font-display)] text-lg tracking-tight">Активные сделки</h2>
+            <Badge variant="secondary" className="rounded-full">{openDeals.length}</Badge>
           </div>
           <div className="space-y-3">
             {openDeals.map((deal) => {
@@ -56,15 +60,17 @@ export default function DashboardPage() {
               return (
                 <div
                   key={deal.id}
-                  className="flex flex-col gap-2 rounded-xl border border-[var(--pult-line)] px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-2 rounded-2xl border border-[var(--pult-line)] bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(247,248,246,0.9))] px-4 py-3.5 transition-all hover:border-[var(--pult-accent)]/30 hover:shadow-[var(--pult-shadow)] sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div>
-                    <div className="font-medium">{deal.title}</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="font-medium tracking-tight">{deal.title}</div>
+                    <div className="mt-0.5 text-sm text-muted-foreground">
                       {STAGE_LABELS[deal.stage]} · {owner?.name}
                     </div>
                   </div>
-                  <div className="text-sm font-medium">{formatMoney(deal.amount)}</div>
+                  <div className="font-[family-name:var(--font-display)] text-sm tracking-tight">
+                    {formatMoney(deal.amount)}
+                  </div>
                 </div>
               );
             })}

@@ -28,18 +28,18 @@ export default function AdminPage() {
         title="Админка"
         description="Люди, роли, интеграции и журнал — как отдельный продукт, а не подвал."
         actions={
-          <Button className="bg-[var(--pult-accent)] text-white hover:bg-[var(--pult-accent)]/90">
+          <Button className="rounded-full bg-[var(--pult-accent)] px-5 text-white shadow-[0_14px_34px_-18px_rgba(11,107,86,0.85)] hover:bg-[var(--pult-accent)]/90">
             Пригласить человека
           </Button>
         }
       />
 
       <Tabs defaultValue="people">
-        <TabsList className="mb-4">
-          <TabsTrigger value="people">Команда</TabsTrigger>
-          <TabsTrigger value="access">Права</TabsTrigger>
-          <TabsTrigger value="integrations">Интеграции</TabsTrigger>
-          <TabsTrigger value="audit">Журнал</TabsTrigger>
+        <TabsList className="mb-4 rounded-full bg-white/70 p-1 shadow-[var(--pult-shadow)]">
+          <TabsTrigger value="people" className="rounded-full">Команда</TabsTrigger>
+          <TabsTrigger value="access" className="rounded-full">Права</TabsTrigger>
+          <TabsTrigger value="integrations" className="rounded-full">Интеграции</TabsTrigger>
+          <TabsTrigger value="audit" className="rounded-full">Журнал</TabsTrigger>
         </TabsList>
 
         <TabsContent value="people">

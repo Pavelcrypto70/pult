@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Onest, Unbounded } from "next/font/google";
+import { Geologica, Onest } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
@@ -9,10 +9,10 @@ const onest = Onest({
   weight: ["400", "500", "600", "700"],
 });
 
-const unbounded = Unbounded({
+const geologica = Geologica({
   variable: "--font-display",
   subsets: ["latin", "cyrillic"],
-  weight: ["500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -25,7 +25,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="ru"
-      className={`${onest.variable} ${unbounded.variable} h-full antialiased`}
+      className={`${onest.variable} ${geologica.variable} h-full antialiased`}
     >
       <body className="min-h-full font-[family-name:var(--font-body)] text-[var(--pult-ink)]">
         <TooltipProvider>{children}</TooltipProvider>

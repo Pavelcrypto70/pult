@@ -46,18 +46,22 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-  --color-sidebar: var(--sidebar);
 }
 
 :root {
-  --pult-ink: #101820;
-  --pult-paper: #f4f7f5;
-  --pult-canvas: #eef2ef;
+  --pult-ink: #0c1210;
+  --pult-ink-soft: #24302c;
+  --pult-paper: #f7f8f6;
+  --pult-canvas: #ebefec;
   --pult-elevated: #ffffff;
-  --pult-line: rgba(16, 24, 32, 0.08);
-  --pult-accent: #0f7a62;
-  --pult-accent-soft: #d8efe8;
-  --pult-warm: #c9783f;
+  --pult-line: rgba(12, 18, 16, 0.07);
+  --pult-line-strong: rgba(12, 18, 16, 0.12);
+  --pult-accent: #0b6b56;
+  --pult-accent-soft: #d7eee6;
+  --pult-gold: #9a7b4f;
+  --pult-warm: #b86a3d;
+  --pult-shadow: 0 1px 0 rgba(12, 18, 16, 0.04), 0 18px 40px -28px rgba(12, 18, 16, 0.35);
+  --pult-shadow-lg: 0 1px 0 rgba(12, 18, 16, 0.04), 0 28px 60px -32px rgba(12, 18, 16, 0.45);
   --background: var(--pult-canvas);
   --foreground: var(--pult-ink);
   --card: var(--pult-elevated);
@@ -66,27 +70,27 @@
   --popover-foreground: var(--pult-ink);
   --primary: var(--pult-ink);
   --primary-foreground: var(--pult-paper);
-  --secondary: #e5ebe7;
+  --secondary: #e3e9e5;
   --secondary-foreground: var(--pult-ink);
-  --muted: #e5ebe7;
-  --muted-foreground: #5d6b66;
+  --muted: #e3e9e5;
+  --muted-foreground: #5a6862;
   --accent: var(--pult-accent-soft);
   --accent-foreground: var(--pult-accent);
-  --destructive: #c4472f;
+  --destructive: #b8432f;
   --border: var(--pult-line);
-  --input: rgba(16, 24, 32, 0.12);
+  --input: rgba(12, 18, 16, 0.11);
   --ring: var(--pult-accent);
   --chart-1: var(--pult-accent);
-  --chart-2: var(--pult-warm);
+  --chart-2: var(--pult-gold);
   --chart-3: #2f6fed;
   --chart-4: #7a8f84;
-  --chart-5: #101820;
-  --radius: 0.85rem;
-  --sidebar: #f7faf8;
+  --chart-5: #0c1210;
+  --radius: 1rem;
+  --sidebar: rgba(247, 248, 246, 0.92);
   --sidebar-foreground: var(--pult-ink);
   --sidebar-primary: var(--pult-accent);
   --sidebar-primary-foreground: white;
-  --sidebar-accent: #e7f3ee;
+  --sidebar-accent: #e4f2ec;
   --sidebar-accent-foreground: var(--pult-ink);
   --sidebar-border: var(--pult-line);
   --sidebar-ring: var(--pult-accent);
@@ -97,42 +101,90 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    background-image:
+      radial-gradient(1200px 600px at 100% -10%, rgba(11, 107, 86, 0.07), transparent 55%),
+      radial-gradient(900px 500px at -10% 110%, rgba(154, 123, 79, 0.06), transparent 50%);
+    background-attachment: fixed;
   }
   html {
     @apply font-sans;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--pult-accent) 28%, white);
   }
 }
 
 .pult-hero {
   background:
-    radial-gradient(900px 480px at 85% 10%, rgba(15, 122, 98, 0.18), transparent 60%),
-    radial-gradient(700px 420px at 10% 90%, rgba(201, 120, 63, 0.14), transparent 55%),
-    linear-gradient(160deg, #f7faf8 0%, #e7efea 45%, #d9e8e2 100%);
+    radial-gradient(1000px 520px at 88% 8%, rgba(11, 107, 86, 0.22), transparent 58%),
+    radial-gradient(820px 460px at 8% 92%, rgba(154, 123, 79, 0.16), transparent 55%),
+    linear-gradient(155deg, #f8faf8 0%, #e8efea 42%, #d7e5df 100%);
 }
 
 .pult-grid {
   background-image:
-    linear-gradient(rgba(16, 24, 32, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(16, 24, 32, 0.035) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse at center, black 35%, transparent 80%);
+    linear-gradient(rgba(12, 18, 16, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(12, 18, 16, 0.03) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 78%);
+}
+
+.pult-grain,
+.pult-grain,
+.pult-grain {
+  opacity: 0.28;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.pult-glass {
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(12, 18, 16, 0.08);
+  backdrop-filter: blur(18px) saturate(1.2);
+  box-shadow: var(--pult-shadow);
+}
+
+.pult-panel {
+  background: var(--pult-elevated);
+  border: 1px solid var(--pult-line);
+  box-shadow: var(--pult-shadow);
+}
+
+.pult-nav-active,
+.pult-nav-active {
+  background: linear-gradient(135deg, rgba(11, 107, 86, 0.12), rgba(11, 107, 86, 0.05));
+  color: var(--pult-ink);
+  box-shadow: inset 0 0 0 1px rgba(11, 107, 86, 0.12);
 }
 
 .pult-fade {
-  animation: pult-fade 0.7s ease both;
+  animation: pult-fade 0.75s ease both;
 }
 
 .pult-rise {
-  animation: pult-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: pult-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .pult-rise-2 {
-  animation: pult-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+  animation: pult-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
 }
 
 .pult-rise-3 {
-  animation: pult-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+  animation: pult-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+
+.pult-rise-4 {
+  animation: pult-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+}
+
+.pult-orbit {
+  animation: pult-orbit 14s ease-in-out infinite;
+}
+
+.pult-orbit-slow {
+  animation: pult-orbit 18s ease-in-out infinite reverse;
 }
 
 @keyframes pult-fade {
@@ -147,7 +199,7 @@
 @keyframes pult-rise {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -155,11 +207,24 @@
   }
 }
 
+@keyframes pult-orbit {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -16px, 0) scale(1.03);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pult-fade,
   .pult-rise,
   .pult-rise-2,
-  .pult-rise-3 {
+  .pult-rise-3,
+  .pult-rise-4,
+  .pult-orbit,
+  .pult-orbit-slow {
     animation: none;
   }
 }

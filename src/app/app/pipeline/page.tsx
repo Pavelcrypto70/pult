@@ -39,7 +39,7 @@ export default function PipelinePage() {
                   return (
                     <article
                       key={deal.id}
-                      className="rounded-xl border border-[var(--pult-line)] bg-[var(--pult-canvas)] p-3 transition-colors hover:border-[var(--pult-accent)]/35"
+                      className="rounded-2xl border border-[var(--pult-line)] bg-[linear-gradient(180deg,#fff,rgba(247,248,246,0.92))] p-3.5 shadow-[0_1px_0_rgba(12,18,16,0.03)] transition-all hover:-translate-y-0.5 hover:border-[var(--pult-accent)]/35 hover:shadow-[var(--pult-shadow)]"
                     >
                       <h3 className="text-sm font-medium leading-snug">{deal.title}</h3>
                       <p className="mt-1 text-xs text-muted-foreground">
