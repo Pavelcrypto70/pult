@@ -8,6 +8,7 @@ import {
   Kanban,
   CheckSquare,
   Settings2,
+  Building2,
   Search,
   Command,
   Sparkles,
@@ -37,6 +38,7 @@ const nav = [
   { href: "/app/clients", label: "Клиенты", icon: Users },
   { href: "/app/pipeline", label: "Воронка", icon: Kanban },
   { href: "/app/tasks", label: "Задачи", icon: CheckSquare },
+  { href: "/app/companies", label: "Компании", icon: Building2 },
   { href: "/app/admin", label: "Админка", icon: Settings2 },
 ];
 
