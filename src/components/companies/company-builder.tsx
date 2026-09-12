@@ -32,6 +32,7 @@ import {
   FIELD_TYPE_LABELS,
   INDUSTRIES,
   MODULE_CATALOG,
+  buildDoorStoreDraftModules,
   type Company,
   type CustomField,
   type FieldType,
@@ -40,6 +41,7 @@ import {
   createModuleConfig,
   uid,
 } from "@/lib/company";
+import { DOOR_STORE_PRESET } from "@/lib/doors";
 
 export interface CompanyDraft {
   name: string;
@@ -211,11 +213,44 @@ export function CompanyBuilder({
 
   const canSubmit = draft.name.trim().length > 1 && draft.moduleIds.length > 0;
 
+  function applyDoorPreset() {
+    const moduleIds = [...DOOR_STORE_PRESET.moduleIds];
+    setDraft({
+      name: DOOR_STORE_PRESET.name,
+      industry: DOOR_STORE_PRESET.industry,
+      description: DOOR_STORE_PRESET.description,
+      moduleIds,
+      modules: buildDoorStoreDraftModules(),
+      roles: DOOR_STORE_PRESET.roles.map((role) => ({
+        id: uid("role"),
+        name: role.name,
+        permissions: role.permissions,
+      })),
+      departments: [...DOOR_STORE_PRESET.departments],
+      customPages: DOOR_STORE_PRESET.pages.map((page) => ({
+        id: uid("page"),
+        title: page.title,
+        description: page.description,
+      })),
+    });
+    setActiveModuleId(moduleIds[0] ?? MODULE_CATALOG[0].id);
+  }
+
   return (
     <div className="space-y-4">
       <Surface className="p-5 sm:p-6">
-        <div className="mb-4 text-[11px] font-medium tracking-[0.16em] text-[var(--pult-accent)] uppercase">
-          Шаг 1 · Компания
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="text-[11px] font-medium tracking-[0.16em] text-[var(--pult-accent)] uppercase">
+            Шаг 1 · Компания
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-full border-[var(--pult-gold)]/40 bg-[linear-gradient(135deg,rgba(154,123,79,0.12),rgba(255,255,255,0.8))]"
+            onClick={applyDoorPreset}
+          >
+            Пресет: салон дверей
+          </Button>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">

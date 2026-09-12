@@ -1,4 +1,5 @@
 import type { Role } from "./types";
+import { DOOR_STORE_MODULE_IDS } from "./doors";
 
 export type FieldType =
   | "text"
@@ -379,6 +380,142 @@ export const MODULE_CATALOG: ModuleDefinition[] = [
     settingKeys: [{ key: "maxRules", label: "Лимит правил", kind: "number" }],
   },
   {
+    id: "door_catalog",
+    title: "Каталог дверей",
+    description: "Коллекции, покрытия, артикулы и витрина салона",
+    category: "sales",
+    icon: "door",
+    defaultFields: [
+      { name: "Модель", type: "text", required: true },
+      {
+        name: "Коллекция",
+        type: "select",
+        required: true,
+        options: ["Atelier", "Noir", "Natura", "Crystal", "Invisible"],
+      },
+      {
+        name: "Покрытие",
+        type: "select",
+        required: true,
+        options: ["шпон дуб", "эмаль", "ПВХ", "стекло", "скрытый алюминий"],
+      },
+      { name: "Артикул", type: "text", required: true },
+      { name: "Цена от", type: "money", required: true },
+      { name: "Срок, дней", type: "number", required: false },
+      { name: "На витрине", type: "checkbox", required: false },
+    ],
+    settingKeys: [
+      { key: "showroomOnly", label: "Фильтр «только витрина»", kind: "toggle" },
+      { key: "showLeadTime", label: "Показывать срок производства", kind: "toggle" },
+    ],
+  },
+  {
+    id: "door_configurator",
+    title: "Конфигуратор двери",
+    description: "Размер, открывание, стекло, ручка, замок, доборы",
+    category: "sales",
+    icon: "sliders",
+    defaultFields: [
+      { name: "Ширина", type: "number", required: true },
+      { name: "Высота", type: "number", required: true },
+      {
+        name: "Открывание",
+        type: "select",
+        required: true,
+        options: ["левое", "правое", "маятник", "раздвижное"],
+      },
+      {
+        name: "Стекло",
+        type: "select",
+        required: false,
+        options: ["нет", "прозрачное", "матовое", "рифлёное", "зеркальное"],
+      },
+      { name: "Фурнитура", type: "text", required: false },
+      { name: "Доборы / наличники", type: "textarea", required: false },
+    ],
+    settingKeys: [
+      { key: "livePrice", label: "Живой пересчёт цены", kind: "toggle" },
+      { key: "pdfQuote", label: "PDF-коммерческое", kind: "toggle" },
+    ],
+  },
+  {
+    id: "door_measurements",
+    title: "Замеры проёмов",
+    description: "Выезд, размеры, фото, готовность объекта",
+    category: "work",
+    icon: "ruler",
+    defaultFields: [
+      { name: "Адрес", type: "text", required: true },
+      { name: "Дата выезда", type: "date", required: true },
+      { name: "Инженер", type: "text", required: true },
+      { name: "Кол-во проёмов", type: "number", required: true },
+      { name: "Толщина стены", type: "text", required: false },
+      { name: "Комментарий", type: "textarea", required: false },
+      { name: "Фотоотчёт", type: "file", required: false },
+    ],
+    defaultStages: [
+      { name: "Назначен", color: "#2f6fed" },
+      { name: "Выполнен", color: "#0b6b56" },
+      { name: "Перезамер", color: "#9a7b4f" },
+    ],
+    settingKeys: [
+      { key: "photoRequired", label: "Фото обязательно", kind: "toggle" },
+      { key: "geoCheck", label: "Геометка выезда", kind: "toggle" },
+    ],
+  },
+  {
+    id: "door_orders",
+    title: "Заказы дверей",
+    description: "От заявки до монтажа и гарантии",
+    category: "sales",
+    icon: "package",
+    defaultFields: [
+      { name: "Клиент", type: "text", required: true },
+      { name: "Объект", type: "text", required: true },
+      { name: "Сумма", type: "money", required: true },
+      { name: "Предоплата", type: "money", required: false },
+      { name: "Дата монтажа", type: "date", required: false },
+    ],
+    defaultStages: [
+      { name: "Заявка", color: "#7a8f84" },
+      { name: "Замер", color: "#2f6fed" },
+      { name: "КП", color: "#9a7b4f" },
+      { name: "Предоплата", color: "#0b6b56" },
+      { name: "Производство", color: "#0b6b56" },
+      { name: "Доставка", color: "#2f6fed" },
+      { name: "Монтаж", color: "#9a7b4f" },
+      { name: "Гарантия", color: "#7a8f84" },
+    ],
+    settingKeys: [
+      { key: "depositPercent", label: "Предоплата, %", kind: "number" },
+      { key: "autoAct", label: "Автоакт после монтажа", kind: "toggle" },
+    ],
+  },
+  {
+    id: "door_install",
+    title: "Монтаж и сервис",
+    description: "Бригады, слоты, акты, гарантийные выезды",
+    category: "work",
+    icon: "wrench",
+    defaultFields: [
+      { name: "Бригада", type: "text", required: true },
+      { name: "Слот", type: "date", required: true },
+      { name: "Часов", type: "number", required: false },
+      {
+        name: "Статус",
+        type: "select",
+        required: true,
+        options: ["запланирован", "в работе", "сдан", "рекламация"],
+      },
+      { name: "Акт", type: "file", required: false },
+      { name: "Заметки", type: "textarea", required: false },
+    ],
+    settingKeys: [
+      { key: "twoManCrew", label: "Минимум 2 монтажника", kind: "toggle" },
+      { key: "warrantyMonths", label: "Гарантия, мес.", kind: "number" },
+    ],
+  },
+  {
     id: "custom_module",
     title: "Свой модуль",
     description: "Пустой модуль под ваш процесс",
@@ -439,6 +576,7 @@ export function canUserCreateCompany(
 }
 
 export const INDUSTRIES = [
+  "Магазин дверей",
   "Digital-студия",
   "Агентство",
   "Продуктовая команда",
@@ -454,6 +592,10 @@ export const AUTOMATION_TRIGGERS = [
   "Задача просрочена",
   "Новый тикет",
   "Счёт оплачен",
+  "Замер назначен",
+  "Предоплата получена",
+  "Дверь поступила на склад",
+  "Монтаж завершён",
 ];
 
 export const AUTOMATION_ACTIONS = [
@@ -462,4 +604,16 @@ export const AUTOMATION_ACTIONS = [
   "Сменить ответственного",
   "Добавить тег",
   "Отправить email",
+  "Создать выезд замерщика",
+  "Сформировать КП PDF",
+  "Поставить слот монтажа",
+  "Открыть гарантийный кейс",
 ];
+
+export function buildDoorStoreDraftModules() {
+  return DOOR_STORE_MODULE_IDS.map((id) => {
+    const def = MODULE_CATALOG.find((m) => m.id === id);
+    if (!def) throw new Error(`Missing door module: ${id}`);
+    return createModuleConfig(def);
+  });
+}

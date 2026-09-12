@@ -12,6 +12,11 @@ import {
   Search,
   Command,
   Sparkles,
+  DoorOpen,
+  Package,
+  Ruler,
+  SlidersHorizontal,
+  Wrench,
 } from "lucide-react";
 import {
   Sidebar,
@@ -40,6 +45,14 @@ const nav = [
   { href: "/app/tasks", label: "Задачи", icon: CheckSquare },
   { href: "/app/companies", label: "Компании", icon: Building2 },
   { href: "/app/admin", label: "Админка", icon: Settings2 },
+];
+
+const doorNav = [
+  { href: "/app/doors", label: "Витрина", icon: DoorOpen, exact: true },
+  { href: "/app/doors/orders", label: "Заказы", icon: Package },
+  { href: "/app/doors/measurements", label: "Замеры", icon: Ruler },
+  { href: "/app/doors/configurator", label: "Конфигуратор", icon: SlidersHorizontal },
+  { href: "/app/doors/install", label: "Монтаж", icon: Wrench },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -78,6 +91,32 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     item.href === "/app"
                       ? pathname === "/app"
                       : pathname.startsWith(item.href);
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        isActive={active}
+                        className={active ? "pult-nav-active font-medium" : ""}
+                        render={<Link href={item.href} />}
+                      >
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel className="tracking-[0.14em] text-[10px] uppercase">
+              Салон дверей
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {doorNav.map((item) => {
+                  const active = item.exact
+                    ? pathname === item.href
+                    : pathname.startsWith(item.href);
                   return (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton
