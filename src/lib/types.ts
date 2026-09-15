@@ -41,14 +41,22 @@ export interface Deal {
   dueDate: string;
 }
 
+export interface TaskDocument {
+  id: string;
+  name: string;
+  sizeLabel: string;
+}
+
 export interface TaskItem {
   id: string;
   title: string;
+  body?: string;
   status: TaskStatus;
   priority: TaskPriority;
   assigneeId: string;
   clientId?: string;
   dueDate: string;
+  documents?: TaskDocument[];
 }
 
 export interface ActivityItem {

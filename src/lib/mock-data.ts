@@ -157,6 +157,7 @@ export const tasks: TaskItem[] = [
   {
     id: "t1",
     title: "Согласовать слот монтажа Ковалёвым",
+    body: "Нужно подтвердить дату с бригадой «Север» и прислать клиенту окно 10:00–18:00.",
     status: "doing",
     priority: "high",
     assigneeId: "u2",
@@ -166,15 +167,20 @@ export const tasks: TaskItem[] = [
   {
     id: "t2",
     title: "Подготовить КП Invisible для офиса",
+    body: "18 проёмов, высота 2400. Вложить PDF и спецификацию скрытых коробов.",
     status: "todo",
     priority: "high",
     assigneeId: "u3",
     clientId: "c4",
     dueDate: "2026-09-15",
+    documents: [
+      { id: "d1", name: "plan-paveletskaya.pdf", sizeLabel: "1.2 МБ" },
+    ],
   },
   {
     id: "t3",
     title: "Проверить предоплаты за неделю",
+    body: "Сверка поступлений по заказам в статусе «Предоплата» и «Производство».",
     status: "todo",
     priority: "medium",
     assigneeId: "u1",
