@@ -41,7 +41,7 @@ import { Input } from "@/components/ui/input";
 const nav = [
   { href: "/app", label: "Обзор", icon: LayoutDashboard },
   { href: "/app/clients", label: "Клиенты", icon: Users },
-  { href: "/app/pipeline", label: "Воронка", icon: Kanban },
+  { href: "/app/pipeline", label: "Сделки", icon: Kanban },
   { href: "/app/tasks", label: "Задачи", icon: CheckSquare },
   { href: "/app/companies", label: "Компании", icon: Building2 },
   { href: "/app/admin", label: "Админка", icon: Settings2 },
