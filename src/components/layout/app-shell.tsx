@@ -17,6 +17,7 @@ import {
   Ruler,
   SlidersHorizontal,
   Wrench,
+  ChartColumnIncreasing,
 } from "lucide-react";
 import {
   Sidebar,
@@ -37,23 +38,104 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
-const nav = [
-  { href: "/app", label: "Обзор", icon: LayoutDashboard },
+type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  exact?: boolean;
+  hint?: string;
+};
+
+const opsNav: NavItem[] = [
+  { href: "/app", label: "Обзор", icon: LayoutDashboard, exact: true },
+  {
+    href: "/app/pipeline",
+    label: "Сделки",
+    icon: Kanban,
+    hint: "Канбан · 3 направления",
+  },
+  {
+    href: "/app/reports",
+    label: "Отчёт",
+    icon: ChartColumnIncreasing,
+    hint: "Общие данные",
+  },
   { href: "/app/clients", label: "Клиенты", icon: Users },
-  { href: "/app/pipeline", label: "Сделки", icon: Kanban },
   { href: "/app/tasks", label: "Задачи", icon: CheckSquare },
-  { href: "/app/companies", label: "Компании", icon: Building2 },
-  { href: "/app/admin", label: "Админка", icon: Settings2 },
 ];
 
-const doorNav = [
+const doorNav: NavItem[] = [
   { href: "/app/doors", label: "Витрина", icon: DoorOpen, exact: true },
   { href: "/app/doors/orders", label: "Заказы", icon: Package },
   { href: "/app/doors/measurements", label: "Замеры", icon: Ruler },
   { href: "/app/doors/configurator", label: "Конфигуратор", icon: SlidersHorizontal },
   { href: "/app/doors/install", label: "Монтаж", icon: Wrench },
 ];
+
+const systemNav: NavItem[] = [
+  { href: "/app/companies", label: "Компании", icon: Building2 },
+  { href: "/app/admin", label: "Админка", icon: Settings2 },
+];
+
+function isActive(pathname: string, item: NavItem) {
+  if (item.exact || item.href === "/app") return pathname === item.href;
+  return pathname === item.href || pathname.startsWith(`${item.href}/`);
+}
+
+function NavGroup({
+  label,
+  items,
+  pathname,
+}: {
+  label: string;
+  items: NavItem[];
+  pathname: string;
+}) {
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel className="tracking-[0.14em] text-[10px] uppercase">
+        {label}
+      </SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map((item) => {
+            const active = isActive(pathname, item);
+            return (
+              <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton
+                  isActive={active}
+                  className={cn(
+                    "h-auto min-h-8 py-2",
+                    active && "pult-nav-active font-medium",
+                    item.hint && "items-start",
+                  )}
+                  render={<Link href={item.href} />}
+                >
+                  <item.icon className={cn(item.hint && "mt-0.5")} />
+                  <span className="flex min-w-0 flex-col gap-0.5">
+                    <span>{item.label}</span>
+                    {item.hint ? (
+                      <span
+                        className={cn(
+                          "text-[10px] font-normal tracking-normal",
+                          active ? "text-[var(--pult-accent)]/80" : "text-muted-foreground",
+                        )}
+                      >
+                        {item.hint}
+                      </span>
+                    ) : null}
+                  </span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+}
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -80,59 +162,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel className="tracking-[0.14em] text-[10px] uppercase">
-              Workspace
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {nav.map((item) => {
-                  const active =
-                    item.href === "/app"
-                      ? pathname === "/app"
-                      : pathname.startsWith(item.href);
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        isActive={active}
-                        className={active ? "pult-nav-active font-medium" : ""}
-                        render={<Link href={item.href} />}
-                      >
-                        <item.icon />
-                        <span>{item.label}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-          <SidebarGroup>
-            <SidebarGroupLabel className="tracking-[0.14em] text-[10px] uppercase">
-              Салон дверей
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {doorNav.map((item) => {
-                  const active = item.exact
-                    ? pathname === item.href
-                    : pathname.startsWith(item.href);
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        isActive={active}
-                        className={active ? "pult-nav-active font-medium" : ""}
-                        render={<Link href={item.href} />}
-                      >
-                        <item.icon />
-                        <span>{item.label}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          <NavGroup label="Операции" items={opsNav} pathname={pathname} />
+          <NavGroup label="Салон дверей" items={doorNav} pathname={pathname} />
+          <NavGroup label="Система" items={systemNav} pathname={pathname} />
         </SidebarContent>
         <SidebarFooter className="px-3 pb-3">
           <div className="rounded-2xl border border-[var(--pult-line)] bg-white/70 p-3 shadow-[var(--pult-shadow)]">
