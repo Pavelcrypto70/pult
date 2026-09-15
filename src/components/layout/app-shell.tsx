@@ -8,7 +8,6 @@ import {
   Kanban,
   CheckSquare,
   Settings2,
-  Building2,
   Search,
   Command,
   Sparkles,
@@ -64,6 +63,7 @@ const opsNav: NavItem[] = [
   },
   { href: "/app/clients", label: "Клиенты", icon: Users },
   { href: "/app/tasks", label: "Задачи", icon: CheckSquare },
+  { href: "/app/admin", label: "Админка", icon: Settings2 },
 ];
 
 const doorNav: NavItem[] = [
@@ -72,11 +72,6 @@ const doorNav: NavItem[] = [
   { href: "/app/doors/measurements", label: "Замеры", icon: Ruler },
   { href: "/app/doors/configurator", label: "Конфигуратор", icon: SlidersHorizontal },
   { href: "/app/doors/install", label: "Монтаж", icon: Wrench },
-];
-
-const systemNav: NavItem[] = [
-  { href: "/app/companies", label: "Компании", icon: Building2 },
-  { href: "/app/admin", label: "Админка", icon: Settings2 },
 ];
 
 function isActive(pathname: string, item: NavItem) {
@@ -156,15 +151,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 Пульт
               </div>
               <div className="text-[10px] tracking-[0.16em] text-muted-foreground uppercase">
-                Studio OS
+                Door Salon
               </div>
             </div>
           </Link>
         </SidebarHeader>
         <SidebarContent>
-          <NavGroup label="Операции" items={opsNav} pathname={pathname} />
-          <NavGroup label="Салон дверей" items={doorNav} pathname={pathname} />
-          <NavGroup label="Система" items={systemNav} pathname={pathname} />
+          <NavGroup label="Салон" items={opsNav} pathname={pathname} />
+          <NavGroup label="Каталог и сервис" items={doorNav} pathname={pathname} />
         </SidebarContent>
         <SidebarFooter className="px-3 pb-3">
           <div className="rounded-2xl border border-[var(--pult-line)] bg-white/70 p-3 shadow-[var(--pult-shadow)]">
@@ -180,7 +174,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Avatar>
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-medium">Анна Крылова</div>
-                <div className="truncate text-xs text-muted-foreground">Владелец · Север</div>
+                <div className="truncate text-xs text-muted-foreground">Владелец · Atelier Doors</div>
               </div>
             </div>
           </div>

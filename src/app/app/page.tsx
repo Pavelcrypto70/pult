@@ -32,21 +32,21 @@ export default function DashboardPage() {
     <div>
       <PageHeader
         title="Обзор"
-        description="Утренний срез студии и салона дверей: деньги, замеры, монтаж."
+        description="Утренний срез салона дверей: сделки, замеры, монтаж."
         actions={
           <>
             <Button
               variant="outline"
               className="rounded-full border-[var(--pult-line)] bg-white/80"
-              render={<Link href="/app/doors" />}
+              render={<Link href="/app/reports" />}
             >
-              Витрина
+              Отчёт
             </Button>
             <Button
               className="rounded-full bg-[var(--pult-ink)] px-5 text-[var(--pult-paper)] hover:bg-[var(--pult-ink)]/90"
-              render={<Link href="/app/doors/orders" />}
+              render={<Link href="/app/pipeline" />}
             >
-              Заказы дверей
+              Сделки
             </Button>
           </>
         }

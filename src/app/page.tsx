@@ -27,7 +27,7 @@ export default function LandingPage() {
                   Пульт
                 </div>
                 <div className="text-[11px] tracking-[0.14em] text-muted-foreground uppercase">
-                  Studio OS
+                  Door Salon
                 </div>
               </div>
             </div>
@@ -37,9 +37,9 @@ export default function LandingPage() {
               </Button>
               <Button
                 className="rounded-full bg-[var(--pult-ink)] px-5 text-[var(--pult-paper)] hover:bg-[var(--pult-ink)]/90"
-                render={<Link href="/app" />}
+                render={<Link href="/app/pipeline" />}
               >
-                Открыть демо
+                Открыть сделки
               </Button>
             </div>
           </nav>
@@ -47,28 +47,28 @@ export default function LandingPage() {
           <div className="mt-auto grid gap-10 pb-6 pt-24 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
             <div className="max-w-3xl">
               <p className="mb-5 text-xs font-medium tracking-[0.22em] text-[var(--pult-accent)] uppercase pult-rise">
-                Première edition
+                Магазин дверей
               </p>
               <p className="font-[family-name:var(--font-display)] text-[clamp(3.2rem,11vw,6.8rem)] leading-[0.88] tracking-[-0.045em] text-[var(--pult-ink)] pult-rise">
                 Пульт
               </p>
               <h1 className="mt-6 max-w-xl text-balance text-2xl font-medium leading-tight text-[var(--pult-ink-soft)] sm:text-[2rem] pult-rise-2">
-                Операционная система студии — ясно, быстро, красиво
+                Операционка салона дверей — от витрины до монтажа
               </h1>
               <p className="mt-4 max-w-lg text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg pult-rise-3">
-                Клиенты, короткая воронка, задачи и админка премиального уровня.
-                Без комбайна Битрикса и Notion-свалки.
+                Сделки по трём направлениям, витрина, замеры, конфигуратор и общий отчёт.
+                Без лишних модулей и конструктора компаний.
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-3 pult-rise-4">
                 <Button
                   size="lg"
                   className="rounded-full bg-[var(--pult-accent)] px-7 text-white shadow-[0_16px_40px_-18px_rgba(11,107,86,0.8)] hover:bg-[var(--pult-accent)]/90"
-                  render={<Link href="/app" />}
+                  render={<Link href="/app/pipeline" />}
                 >
-                  Смотреть кабинет
+                  Смотреть канбан
                 </Button>
                 <span className="text-sm text-muted-foreground">
-                  5–30 человек · без франкенштейна
+                  Продажа · Поставка · Сервис
                 </span>
               </div>
             </div>
@@ -84,9 +84,9 @@ export default function LandingPage() {
               </div>
               <div className="space-y-3">
                 {[
-                  ["Воронка", "2,23 млн ₽"],
-                  ["Горит сегодня", "3 задачи"],
-                  ["Команда", "4 активных"],
+                  ["Сделки на досках", "22"],
+                  ["Заказы в работе", "3,5 млн ₽"],
+                  ["Направления", "3"],
                 ].map(([label, value]) => (
                   <div
                     key={label}
@@ -108,16 +108,16 @@ export default function LandingPage() {
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-20 sm:px-8 md:grid-cols-3">
           {[
             {
-              title: "Только нужное",
-              text: "Клиенты, сделки, задачи, команда, права. Без склада, телефонии и конструктора вселенной.",
+              title: "Три направления",
+              text: "Продажа, поставка/доставка/монтаж и постгарантийный сервис — каждая со своими столбцами.",
             },
             {
-              title: "Интерфейс как продукт",
-              text: "Админка и рабочие экраны на одном визуальном языке — быстро, плотно, дорого.",
+              title: "Салон целиком",
+              text: "Витрина, заказы, замеры, конфигуратор и монтаж в одном контуре, без комбайна.",
             },
             {
-              title: "Для студий 5–30",
-              text: "Владелец видит деньги и сроки. Менеджер — воронку. Исполнитель — свои задачи.",
+              title: "Общий отчёт",
+              text: "Сводка по деньгам, флагам, ответственным и операциям салона на одном экране.",
             },
           ].map((item) => (
             <div key={item.title} className="group">
