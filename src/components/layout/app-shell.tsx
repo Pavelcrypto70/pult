@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  Users,
   Kanban,
   CheckSquare,
   Settings2,
@@ -14,9 +13,7 @@ import {
   DoorOpen,
   Package,
   Ruler,
-  SlidersHorizontal,
   Wrench,
-  ChartColumnIncreasing,
 } from "lucide-react";
 import {
   Sidebar,
@@ -55,13 +52,6 @@ const opsNav: NavItem[] = [
     icon: Kanban,
     hint: "Канбан · 3 направления",
   },
-  {
-    href: "/app/reports",
-    label: "Отчёт",
-    icon: ChartColumnIncreasing,
-    hint: "Общие данные",
-  },
-  { href: "/app/clients", label: "Клиенты", icon: Users },
   { href: "/app/tasks", label: "Задачи", icon: CheckSquare },
   { href: "/app/admin", label: "Админка", icon: Settings2 },
 ];
@@ -70,7 +60,8 @@ const doorNav: NavItem[] = [
   { href: "/app/doors", label: "Витрина", icon: DoorOpen, exact: true },
   { href: "/app/doors/orders", label: "Заказы", icon: Package },
   { href: "/app/doors/measurements", label: "Замеры", icon: Ruler },
-  { href: "/app/doors/configurator", label: "Конфигуратор", icon: SlidersHorizontal },
+  // Конфигуратор временно скрыт
+  // { href: "/app/doors/configurator", label: "Конфигуратор", icon: SlidersHorizontal },
   { href: "/app/doors/install", label: "Монтаж", icon: Wrench },
 ];
 

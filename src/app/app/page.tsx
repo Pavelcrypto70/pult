@@ -1,26 +1,50 @@
+"use client";
+
 import Link from "next/link";
+import { useMemo } from "react";
+import { AlertTriangle, CircleDollarSign, Layers3 } from "lucide-react";
 import { PageHeader, StatCard, Surface } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  activity,
-  deals,
-  formatMoney,
-  memberById,
-  tasks,
-} from "@/lib/mock-data";
+  FLAG_LABELS,
+  KANBAN_COLUMNS,
+  KANBAN_DIRECTIONS,
+  formatKanbanMoney,
+  kanbanDeals,
+} from "@/lib/kanban";
 import {
-  ORDER_STATUS_LABELS,
+  doorCatalog,
   doorInstallJobs,
   doorMeasurements,
   doorOrders,
   formatDoorMoney,
 } from "@/lib/doors";
-import { STAGE_LABELS, STATUS_LABELS } from "@/lib/types";
+import { activity, tasks } from "@/lib/mock-data";
+import { STATUS_LABELS } from "@/lib/types";
 
 export default function DashboardPage() {
-  const openDeals = deals.filter((d) => d.stage !== "won" && d.stage !== "lost");
-  const pipelineSum = openDeals.reduce((sum, d) => sum + d.amount, 0);
+  const byDirection = useMemo(() => {
+    return KANBAN_DIRECTIONS.map((dir) => {
+      const dirDeals = kanbanDeals.filter((d) => d.direction === dir.id);
+      const amount = dirDeals.reduce((sum, d) => sum + d.amount, 0);
+      const overdue = dirDeals.filter((d) => d.flags.includes("overdue")).length;
+      const urgent = dirDeals.filter((d) => d.flags.includes("urgent")).length;
+      const columns = KANBAN_COLUMNS[dir.id].map((col) => {
+        const columnDeals = dirDeals.filter((d) => d.columnId === col.id);
+        return {
+          ...col,
+          count: columnDeals.length,
+          amount: columnDeals.reduce((sum, d) => sum + d.amount, 0),
+        };
+      });
+      return { ...dir, deals: dirDeals, amount, overdue, urgent, columns };
+    });
+  }, []);
+
+  const totalDeals = kanbanDeals.length;
+  const totalAmount = kanbanDeals.reduce((sum, d) => sum + d.amount, 0);
+  const overdueAll = kanbanDeals.filter((d) => d.flags.includes("overdue")).length;
   const hotTasks = tasks.filter((t) => t.status !== "done");
   const doorPipeline = doorOrders
     .filter((o) => o.status !== "done" && o.status !== "lost")
@@ -28,137 +52,184 @@ export default function DashboardPage() {
   const measuresSoon = doorMeasurements.filter((m) => m.status === "scheduled").length;
   const installsSoon = doorInstallJobs.filter((j) => j.status === "planned").length;
 
+  const topOwners = useMemo(() => {
+    const map = new Map<string, { name: string; count: number; amount: number }>();
+    for (const deal of kanbanDeals) {
+      const prev = map.get(deal.owner) ?? { name: deal.owner, count: 0, amount: 0 };
+      prev.count += 1;
+      prev.amount += deal.amount;
+      map.set(deal.owner, prev);
+    }
+    return [...map.values()].sort((a, b) => b.amount - a.amount).slice(0, 5);
+  }, []);
+
+  const flagStats = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const deal of kanbanDeals) {
+      for (const flag of deal.flags) {
+        map.set(flag, (map.get(flag) ?? 0) + 1);
+      }
+    }
+    return [...map.entries()].sort((a, b) => b[1] - a[1]);
+  }, []);
+
   return (
     <div>
       <PageHeader
         title="Обзор"
-        description="Утренний срез салона дверей: сделки, замеры, монтаж."
+        description="Общий срез салона: направления сделок, деньги, флаги, замеры и монтаж."
         actions={
-          <>
-            <Button
-              variant="outline"
-              className="rounded-full border-[var(--pult-line)] bg-white/80"
-              render={<Link href="/app/reports" />}
-            >
-              Отчёт
-            </Button>
-            <Button
-              className="rounded-full bg-[var(--pult-ink)] px-5 text-[var(--pult-paper)] hover:bg-[var(--pult-ink)]/90"
-              render={<Link href="/app/pipeline" />}
-            >
-              Сделки
-            </Button>
-          </>
+          <Button
+            className="rounded-full bg-[var(--pult-ink)] px-5 text-[var(--pult-paper)] hover:bg-[var(--pult-ink)]/90"
+            render={<Link href="/app/pipeline" />}
+          >
+            К сделкам
+          </Button>
         }
       />
 
       <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="В воронке" value={formatMoney(pipelineSum)} hint={`${openDeals.length} активных сделок`} />
-        <StatCard label="Заказы дверей" value={formatDoorMoney(doorPipeline)} hint="Активный контур салона" />
-        <StatCard label="Замеры" value={String(measuresSoon)} hint="Ближайшие выезды" />
-        <StatCard label="Слоты монтажа" value={String(installsSoon)} hint="Бригады впереди" />
+        <StatCard label="Сделок на досках" value={String(totalDeals)} hint="Все направления" />
+        <StatCard label="Сумма контура" value={formatKanbanMoney(totalAmount)} hint="По карточкам канбана" />
+        <StatCard label="Просрочено" value={String(overdueAll)} hint="Флаги на сделках" />
+        <StatCard label="Заказы дверей" value={formatDoorMoney(doorPipeline)} hint="Активный pipeline" />
       </div>
 
-      <Surface className="mb-6 overflow-hidden p-0">
-        <div className="bg-[linear-gradient(120deg,#1a211e_0%,#3d4a43_48%,#9a7b4f_100%)] px-5 py-5 text-white sm:px-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <div className="text-[11px] tracking-[0.16em] text-white/70 uppercase">
-                Atelier Doors · салон
+      <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Замеры" value={String(measuresSoon)} hint="Ближайшие выезды" />
+        <StatCard label="Слоты монтажа" value={String(installsSoon)} hint="Бригады впереди" />
+        <StatCard
+          label="На витрине"
+          value={String(doorCatalog.filter((d) => d.inShowroom).length)}
+          hint="Моделей в салоне"
+        />
+        <StatCard label="Открытые задачи" value={String(hotTasks.length)} hint="По команде" />
+      </div>
+
+      <div className="mb-6 grid gap-4 lg:grid-cols-3">
+        {byDirection.map((dir) => (
+          <Surface key={dir.id} className="overflow-hidden p-0">
+            <div className="border-b border-[var(--pult-line)] bg-[linear-gradient(135deg,rgba(11,107,86,0.08),rgba(154,123,79,0.08),rgba(255,255,255,0.9))] px-5 py-4">
+              <div className="text-[11px] tracking-[0.14em] text-muted-foreground uppercase">
+                Направление
               </div>
-              <h2 className="mt-1 font-[family-name:var(--font-display)] text-2xl tracking-tight">
-                Операционный день магазина дверей
+              <h2 className="mt-1 font-[family-name:var(--font-display)] text-xl tracking-tight">
+                {dir.short}
               </h2>
-              <p className="mt-1 max-w-xl text-sm text-white/75">
-                Витрина → замер → конфигуратор → предоплата → производство → монтаж.
-              </p>
+              <p className="mt-1 text-xs text-muted-foreground">{dir.label}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Badge variant="secondary" className="rounded-full">
+                  {dir.deals.length} сделок
+                </Badge>
+                <Badge className="rounded-full bg-[var(--pult-accent-soft)] text-[var(--pult-accent)]">
+                  {formatKanbanMoney(dir.amount)}
+                </Badge>
+                {dir.overdue > 0 ? (
+                  <Badge className="rounded-full bg-[#fde8e4] text-[#9b3a2c]">
+                    {dir.overdue} просроч.
+                  </Badge>
+                ) : null}
+                {dir.urgent > 0 ? (
+                  <Badge className="rounded-full bg-[#ffe8d6] text-[var(--pult-warm)]">
+                    {dir.urgent} срочно
+                  </Badge>
+                ) : null}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                className="rounded-full border-white/25 bg-white/10 text-white hover:bg-white/15"
-                render={<Link href="/app/doors/configurator" />}
-              >
-                Конфигуратор
-              </Button>
-              <Button
-                className="rounded-full bg-white text-[var(--pult-ink)] hover:bg-white/90"
-                render={<Link href="/app/doors/install" />}
-              >
-                Монтаж
-              </Button>
-            </div>
-          </div>
-        </div>
-        <div className="grid gap-0 sm:grid-cols-3">
-          {doorOrders
-            .filter((o) => o.status === "measure" || o.status === "install" || o.status === "production")
-            .slice(0, 3)
-            .map((order) => (
-              <div
-                key={order.id}
-                className="border-t border-[var(--pult-line)] p-4 sm:border-t-0 sm:border-l first:sm:border-l-0"
-              >
-                <div className="text-sm font-medium">{order.client}</div>
-                <div className="mt-0.5 text-xs text-muted-foreground">
-                  {ORDER_STATUS_LABELS[order.status]} · {order.object}
+            <div className="space-y-2 p-4">
+              {dir.columns.map((col) => (
+                <div
+                  key={col.id}
+                  className="flex items-center justify-between gap-3 rounded-xl bg-[var(--pult-canvas)]/70 px-3 py-2"
+                >
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span
+                      className="size-2.5 shrink-0 rounded-full"
+                      style={{ background: col.accent }}
+                    />
+                    <span className="truncate text-xs font-medium">{col.title}</span>
+                  </div>
+                  <div className="shrink-0 text-right text-xs">
+                    <div className="font-medium">{col.count}</div>
+                    <div className="text-muted-foreground">{formatKanbanMoney(col.amount)}</div>
+                  </div>
                 </div>
-                <div className="mt-2 font-[family-name:var(--font-display)] text-sm">
-                  {formatDoorMoney(order.amount)}
+              ))}
+            </div>
+          </Surface>
+        ))}
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+        <Surface className="p-5 sm:p-6">
+          <div className="mb-4 flex items-center gap-2">
+            <CircleDollarSign className="size-4 text-[var(--pult-gold)]" />
+            <h2 className="font-[family-name:var(--font-display)] text-lg">
+              Нагрузка по ответственным
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {topOwners.map((owner, index) => (
+              <div
+                key={owner.name}
+                className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--pult-line)] bg-white/80 px-4 py-3"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex size-8 items-center justify-center rounded-full bg-[var(--pult-accent-soft)] text-xs font-semibold text-[var(--pult-accent)]">
+                    {index + 1}
+                  </span>
+                  <div>
+                    <div className="text-sm font-medium">{owner.name}</div>
+                    <div className="text-xs text-muted-foreground">{owner.count} сделок</div>
+                  </div>
+                </div>
+                <div className="font-[family-name:var(--font-display)] text-sm">
+                  {formatKanbanMoney(owner.amount)}
                 </div>
               </div>
             ))}
-        </div>
-      </Surface>
-
-      <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-        <Surface className="p-5 sm:p-6">
-          <div className="mb-5 flex items-center justify-between">
-            <h2 className="font-[family-name:var(--font-display)] text-lg tracking-tight">Активные сделки</h2>
-            <Badge variant="secondary" className="rounded-full">{openDeals.length}</Badge>
-          </div>
-          <div className="space-y-3">
-            {openDeals.map((deal) => {
-              const owner = memberById(deal.ownerId);
-              return (
-                <div
-                  key={deal.id}
-                  className="flex flex-col gap-2 rounded-2xl border border-[var(--pult-line)] bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(247,248,246,0.9))] px-4 py-3.5 transition-all hover:border-[var(--pult-accent)]/30 hover:shadow-[var(--pult-shadow)] sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div>
-                    <div className="font-medium tracking-tight">{deal.title}</div>
-                    <div className="mt-0.5 text-sm text-muted-foreground">
-                      {STAGE_LABELS[deal.stage]} · {owner?.name}
-                    </div>
-                  </div>
-                  <div className="font-[family-name:var(--font-display)] text-sm tracking-tight">
-                    {formatMoney(deal.amount)}
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </Surface>
 
         <div className="space-y-4">
           <Surface className="p-5">
-            <h2 className="mb-4 font-[family-name:var(--font-display)] text-lg">Лента</h2>
-            <ul className="space-y-4">
-              {activity.map((item) => (
-                <li key={item.id} className="border-b border-[var(--pult-line)] pb-3 last:border-0 last:pb-0">
+            <div className="mb-4 flex items-center gap-2">
+              <AlertTriangle className="size-4 text-[var(--pult-warm)]" />
+              <h2 className="font-[family-name:var(--font-display)] text-lg">Сигналы по флагам</h2>
+            </div>
+            <div className="space-y-2">
+              {flagStats.map(([flag, count]) => (
+                <div
+                  key={flag}
+                  className="flex items-center justify-between rounded-xl bg-[var(--pult-canvas)]/80 px-3 py-2 text-sm"
+                >
+                  <span>{FLAG_LABELS[flag as keyof typeof FLAG_LABELS]}</span>
+                  <Badge variant="secondary" className="rounded-full">
+                    {count}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </Surface>
+
+          <Surface className="p-5">
+            <div className="mb-4 flex items-center gap-2">
+              <Layers3 className="size-4 text-[var(--pult-accent)]" />
+              <h2 className="font-[family-name:var(--font-display)] text-lg">Лента и задачи</h2>
+            </div>
+            <ul className="mb-4 space-y-3">
+              {activity.slice(0, 3).map((item) => (
+                <li key={item.id} className="border-b border-[var(--pult-line)] pb-3 last:border-0">
                   <p className="text-sm leading-relaxed">{item.text}</p>
                   <p className="mt-1 text-xs text-muted-foreground">{item.time}</p>
                 </li>
               ))}
             </ul>
-          </Surface>
-          <Surface className="p-5">
-            <h2 className="mb-4 font-[family-name:var(--font-display)] text-lg">Задачи в работе</h2>
-            <div className="space-y-3">
-              {hotTasks.slice(0, 4).map((task) => (
-                <div key={task.id} className="flex items-start justify-between gap-3">
+            <div className="space-y-2">
+              {hotTasks.slice(0, 3).map((task) => (
+                <div key={task.id} className="flex items-start justify-between gap-3 text-sm">
                   <div>
-                    <div className="text-sm font-medium">{task.title}</div>
+                    <div className="font-medium">{task.title}</div>
                     <div className="text-xs text-muted-foreground">
                       {STATUS_LABELS[task.status]} · до {task.dueDate}
                     </div>

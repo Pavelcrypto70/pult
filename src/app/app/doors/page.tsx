@@ -50,9 +50,9 @@ export default function DoorShowroomPage() {
             <Button
               variant="outline"
               className="rounded-full"
-              render={<Link href="/app/doors/configurator" />}
+              render={<Link href="/app/doors/measurements" />}
             >
-              Конфигуратор
+              Замеры
             </Button>
             <Button
               className="rounded-full bg-[var(--pult-ink)] text-[var(--pult-paper)] hover:bg-[var(--pult-ink)]/90"
