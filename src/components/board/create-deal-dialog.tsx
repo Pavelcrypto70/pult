@@ -222,13 +222,19 @@ export function CreateDealDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>Клиент</Label>
-            <Input value={client} onChange={(e) => setClient(e.target.value)} className="bg-white" />
+            <Label htmlFor="deal-client">Клиент</Label>
+            <Input
+              id="deal-client"
+              value={client}
+              onChange={(e) => setClient(e.target.value)}
+              className="bg-white"
+            />
           </div>
 
           <div className="space-y-2">
-            <Label>Суть</Label>
+            <Label htmlFor="deal-body">Суть</Label>
             <textarea
+              id="deal-body"
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={3}
@@ -239,8 +245,9 @@ export function CreateDealDialog({
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>Сумма, ₽</Label>
+              <Label htmlFor="deal-amount">Сумма, ₽</Label>
               <Input
+                id="deal-amount"
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
@@ -267,8 +274,9 @@ export function CreateDealDialog({
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>Контакт</Label>
+              <Label htmlFor="deal-contact">Контакт</Label>
               <Input
+                id="deal-contact"
                 value={contactName}
                 onChange={(e) => setContactName(e.target.value)}
                 placeholder="ФИО"

@@ -195,6 +195,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Button
               size="sm"
               className="rounded-full bg-[var(--pult-ink)] px-4 text-[var(--pult-paper)] hover:bg-[var(--pult-ink)]/90"
+              render={<Link href="/app/pipeline/?create=1" />}
             >
               Создать
             </Button>

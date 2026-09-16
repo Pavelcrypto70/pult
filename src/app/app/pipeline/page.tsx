@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ChevronDown,
   GripVertical,
@@ -55,6 +55,17 @@ export default function PipelinePage() {
   const [dropTarget, setDropTarget] = useState<string | null>(null);
   const [dropDenied, setDropDenied] = useState(false);
   const [draggingBlockId, setDraggingBlockId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("create") !== "1") return;
+    setCreateOpen(true);
+    params.delete("create");
+    const qs = params.toString();
+    const next = `${window.location.pathname}${qs ? `?${qs}` : ""}${window.location.hash}`;
+    window.history.replaceState({}, "", next);
+  }, []);
 
   const active = board.state.directions.find((d) => d.id === direction)!;
   const columns = blocksForDirection(board.state.blocks, direction);
@@ -200,7 +211,7 @@ export default function PipelinePage() {
               onClick={() => openCreate()}
             >
               <Plus className="size-4" />
-              Создать
+              Новая сделка
             </Button>
           </div>
         }
