@@ -163,6 +163,7 @@ export const tasks: TaskItem[] = [
     assigneeId: "u2",
     clientId: "c1",
     dueDate: "2026-09-14",
+    linkedDealCardId: "kd1",
   },
   {
     id: "t2",

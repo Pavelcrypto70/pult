@@ -6,13 +6,13 @@ import { AlertTriangle, CircleDollarSign, Layers3 } from "lucide-react";
 import { PageHeader, StatCard, Surface } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useBoard } from "@/hooks/use-board";
 import {
   FLAG_LABELS,
-  KANBAN_COLUMNS,
-  KANBAN_DIRECTIONS,
-  formatKanbanMoney,
-  kanbanDeals,
-} from "@/lib/kanban";
+  blocksForDirection,
+  formatBoardMoney,
+  type CardFlag,
+} from "@/lib/board";
 import {
   doorCatalog,
   doorInstallJobs,
@@ -24,14 +24,16 @@ import { activity, tasks } from "@/lib/mock-data";
 import { STATUS_LABELS } from "@/lib/types";
 
 export default function DashboardPage() {
+  const board = useBoard();
+
   const byDirection = useMemo(() => {
-    return KANBAN_DIRECTIONS.map((dir) => {
-      const dirDeals = kanbanDeals.filter((d) => d.direction === dir.id);
+    return board.state.directions.map((dir) => {
+      const dirDeals = board.state.cards.filter((d) => d.directionId === dir.id);
       const amount = dirDeals.reduce((sum, d) => sum + d.amount, 0);
       const overdue = dirDeals.filter((d) => d.flags.includes("overdue")).length;
       const urgent = dirDeals.filter((d) => d.flags.includes("urgent")).length;
-      const columns = KANBAN_COLUMNS[dir.id].map((col) => {
-        const columnDeals = dirDeals.filter((d) => d.columnId === col.id);
+      const columns = blocksForDirection(board.state.blocks, dir.id).map((col) => {
+        const columnDeals = dirDeals.filter((d) => d.blockId === col.id);
         return {
           ...col,
           count: columnDeals.length,
@@ -40,11 +42,11 @@ export default function DashboardPage() {
       });
       return { ...dir, deals: dirDeals, amount, overdue, urgent, columns };
     });
-  }, []);
+  }, [board.state]);
 
-  const totalDeals = kanbanDeals.length;
-  const totalAmount = kanbanDeals.reduce((sum, d) => sum + d.amount, 0);
-  const overdueAll = kanbanDeals.filter((d) => d.flags.includes("overdue")).length;
+  const totalDeals = board.state.cards.length;
+  const totalAmount = board.state.cards.reduce((sum, d) => sum + d.amount, 0);
+  const overdueAll = board.state.cards.filter((d) => d.flags.includes("overdue")).length;
   const hotTasks = tasks.filter((t) => t.status !== "done");
   const doorPipeline = doorOrders
     .filter((o) => o.status !== "done" && o.status !== "lost")
@@ -54,24 +56,32 @@ export default function DashboardPage() {
 
   const topOwners = useMemo(() => {
     const map = new Map<string, { name: string; count: number; amount: number }>();
-    for (const deal of kanbanDeals) {
+    for (const deal of board.state.cards) {
       const prev = map.get(deal.owner) ?? { name: deal.owner, count: 0, amount: 0 };
       prev.count += 1;
       prev.amount += deal.amount;
       map.set(deal.owner, prev);
     }
     return [...map.values()].sort((a, b) => b.amount - a.amount).slice(0, 5);
-  }, []);
+  }, [board.state.cards]);
 
   const flagStats = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const deal of kanbanDeals) {
+    const map = new Map<CardFlag, number>();
+    for (const deal of board.state.cards) {
       for (const flag of deal.flags) {
         map.set(flag, (map.get(flag) ?? 0) + 1);
       }
     }
     return [...map.entries()].sort((a, b) => b[1] - a[1]);
-  }, []);
+  }, [board.state.cards]);
+
+  if (!board.ready) {
+    return (
+      <div className="rounded-2xl border border-[var(--pult-line)] bg-white/70 px-4 py-16 text-center text-sm text-muted-foreground">
+        Загружаем обзор…
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -90,7 +100,7 @@ export default function DashboardPage() {
 
       <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Сделок на досках" value={String(totalDeals)} hint="Все направления" />
-        <StatCard label="Сумма контура" value={formatKanbanMoney(totalAmount)} hint="По карточкам канбана" />
+        <StatCard label="Сумма контура" value={formatBoardMoney(totalAmount)} hint="По карточкам канбана" />
         <StatCard label="Просрочено" value={String(overdueAll)} hint="Флаги на сделках" />
         <StatCard label="Заказы дверей" value={formatDoorMoney(doorPipeline)} hint="Активный pipeline" />
       </div>
@@ -122,7 +132,7 @@ export default function DashboardPage() {
                   {dir.deals.length} сделок
                 </Badge>
                 <Badge className="rounded-full bg-[var(--pult-accent-soft)] text-[var(--pult-accent)]">
-                  {formatKanbanMoney(dir.amount)}
+                  {formatBoardMoney(dir.amount)}
                 </Badge>
                 {dir.overdue > 0 ? (
                   <Badge className="rounded-full bg-[#fde8e4] text-[#9b3a2c]">
@@ -145,13 +155,13 @@ export default function DashboardPage() {
                   <div className="flex min-w-0 items-center gap-2">
                     <span
                       className="size-2.5 shrink-0 rounded-full"
-                      style={{ background: col.accent }}
+                      style={{ background: col.color }}
                     />
                     <span className="truncate text-xs font-medium">{col.title}</span>
                   </div>
                   <div className="shrink-0 text-right text-xs">
                     <div className="font-medium">{col.count}</div>
-                    <div className="text-muted-foreground">{formatKanbanMoney(col.amount)}</div>
+                    <div className="text-muted-foreground">{formatBoardMoney(col.amount)}</div>
                   </div>
                 </div>
               ))}
@@ -184,7 +194,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="font-[family-name:var(--font-display)] text-sm">
-                  {formatKanbanMoney(owner.amount)}
+                  {formatBoardMoney(owner.amount)}
                 </div>
               </div>
             ))}
@@ -203,7 +213,7 @@ export default function DashboardPage() {
                   key={flag}
                   className="flex items-center justify-between rounded-xl bg-[var(--pult-canvas)]/80 px-3 py-2 text-sm"
                 >
-                  <span>{FLAG_LABELS[flag as keyof typeof FLAG_LABELS]}</span>
+                  <span>{FLAG_LABELS[flag]}</span>
                   <Badge variant="secondary" className="rounded-full">
                     {count}
                   </Badge>

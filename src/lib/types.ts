@@ -57,6 +57,8 @@ export interface TaskItem {
   clientId?: string;
   dueDate: string;
   documents?: TaskDocument[];
+  /** Optional link to a deal card on the board (docs/LOGIC.md §5.5) */
+  linkedDealCardId?: string;
 }
 
 export interface ActivityItem {

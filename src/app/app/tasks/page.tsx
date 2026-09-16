@@ -23,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useBoard } from "@/hooks/use-board";
 import { clientById, memberById, tasks as seedTasks, team } from "@/lib/mock-data";
 import {
   PRIORITY_LABELS,
@@ -50,6 +51,7 @@ function formatSize(bytes: number) {
 const activeTeam = team.filter((m) => m.active);
 
 export default function TasksPage() {
+  const board = useBoard();
   const fileRef = useRef<HTMLInputElement>(null);
   const [selectedId, setSelectedId] = useState<string>("u1");
   const [items, setItems] = useState<TaskItem[]>(seedTasks);
@@ -61,8 +63,17 @@ export default function TasksPage() {
   const [priority, setPriority] = useState<TaskPriority>("medium");
   const [status, setStatus] = useState<TaskStatus>("todo");
   const [assigneeId, setAssigneeId] = useState("u1");
+  const [linkedDealCardId, setLinkedDealCardId] = useState("");
 
   const selected = memberById(selectedId) ?? activeTeam[0];
+  const dealOptions = useMemo(
+    () =>
+      board.state.cards
+        .slice()
+        .sort((a, b) => a.number.localeCompare(b.number, "ru"))
+        .map((c) => ({ id: c.id, label: `${c.number} · ${c.client}` })),
+    [board.state.cards],
+  );
 
   const filtered = useMemo(
     () => items.filter((task) => task.assigneeId === selectedId),
@@ -88,6 +99,7 @@ export default function TasksPage() {
     setPriority("medium");
     setStatus("todo");
     setAssigneeId(selectedId);
+    setLinkedDealCardId("");
     if (fileRef.current) fileRef.current.value = "";
   }
 
@@ -112,11 +124,18 @@ export default function TasksPage() {
       assigneeId,
       dueDate: dueDate || new Date().toISOString().slice(0, 10),
       documents: documents.length ? documents : undefined,
+      linkedDealCardId: linkedDealCardId || undefined,
     };
     setItems((prev) => [next, ...prev]);
     setSelectedId(assigneeId);
     setOpen(false);
     resetForm();
+  }
+
+  function dealLabel(cardId?: string) {
+    if (!cardId) return null;
+    const card = board.state.cards.find((c) => c.id === cardId);
+    return card ? `${card.number} · ${card.client}` : cardId;
   }
 
   return (
@@ -230,6 +249,11 @@ export default function TasksPage() {
                             {doc.name}
                           </span>
                         ))}
+                      </div>
+                    ) : null}
+                    {task.linkedDealCardId ? (
+                      <div className="mt-2 text-[11px] text-[var(--pult-accent)]">
+                        Сделка: {dealLabel(task.linkedDealCardId)}
                       </div>
                     ) : null}
                   </TableCell>
@@ -404,6 +428,23 @@ export default function TasksPage() {
                 onChange={(e) => setDueDate(e.target.value)}
                 className="bg-white"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="task-deal">Сделка (опционально)</Label>
+              <select
+                id="task-deal"
+                value={linkedDealCardId}
+                onChange={(e) => setLinkedDealCardId(e.target.value)}
+                className="flex h-9 w-full rounded-lg border border-[var(--pult-line)] bg-white px-3 text-sm outline-none"
+              >
+                <option value="">Без привязки</option>
+                {dealOptions.map((deal) => (
+                  <option key={deal.id} value={deal.id}>
+                    {deal.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <DialogFooter>
