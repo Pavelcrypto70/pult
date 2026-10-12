@@ -7,12 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
+import { DEMO_ACCOUNTS } from "@/lib/auth";
+
+const DEMO = DEMO_ACCOUNTS[0];
 
 export default function LoginPage() {
   const { login, ready, isAuthenticated } = useAuth();
   const router = useRouter();
-  const [loginName, setLoginName] = useState("admin");
-  const [password, setPassword] = useState("");
+  const [loginName, setLoginName] = useState(DEMO.login);
+  const [password, setPassword] = useState(DEMO.password);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
 
@@ -22,17 +25,21 @@ export default function LoginPage() {
     }
   }, [ready, isAuthenticated, router]);
 
-  function submit(e: React.FormEvent) {
-    e.preventDefault();
+  function attempt(loginValue: string, passwordValue: string) {
     setPending(true);
     setError("");
-    const result = login(loginName, password);
+    const result = login(loginValue, passwordValue);
     setPending(false);
     if (!result.ok) {
       setError("Неверный логин или пароль");
       return;
     }
     router.replace("/app/");
+  }
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    attempt(loginName, password);
   }
 
   return (
@@ -66,6 +73,7 @@ export default function LoginPage() {
 
         <form
           onSubmit={submit}
+          autoComplete="off"
           className="rounded-[1.5rem] border border-[var(--pult-line)] bg-white/90 p-6 shadow-[var(--pult-shadow-lg)] backdrop-blur-sm sm:p-8"
         >
           <h1 className="font-[family-name:var(--font-display)] text-2xl tracking-tight">
@@ -80,7 +88,8 @@ export default function LoginPage() {
               <Label htmlFor="login">Логин</Label>
               <Input
                 id="login"
-                autoComplete="username"
+                name="pult-login"
+                autoComplete="off"
                 value={loginName}
                 onChange={(e) => setLoginName(e.target.value)}
                 className="bg-white"
@@ -90,8 +99,9 @@ export default function LoginPage() {
               <Label htmlFor="password">Пароль</Label>
               <Input
                 id="password"
+                name="pult-password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="bg-white"
@@ -114,12 +124,26 @@ export default function LoginPage() {
             Войти
           </Button>
 
+          <Button
+            type="button"
+            variant="outline"
+            disabled={pending}
+            className="mt-2 w-full rounded-full"
+            onClick={() => {
+              setLoginName(DEMO.login);
+              setPassword(DEMO.password);
+              attempt(DEMO.login, DEMO.password);
+            }}
+          >
+            Войти как демо-админ
+          </Button>
+
           <div className="mt-5 rounded-2xl bg-[var(--pult-canvas)]/90 px-4 py-3 text-xs leading-relaxed text-muted-foreground">
             <div className="font-medium text-[var(--pult-ink)]">Демо-доступ</div>
             <div className="mt-1">
-              логин <code className="text-[var(--pult-accent)]">admin</code>
+              логин <code className="text-[var(--pult-accent)]">{DEMO.login}</code>
               {" · "}
-              пароль <code className="text-[var(--pult-accent)]">pult-admin</code>
+              пароль <code className="text-[var(--pult-accent)]">{DEMO.password}</code>
             </div>
           </div>
         </form>

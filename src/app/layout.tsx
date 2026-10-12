@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geologica, Onest } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/hooks/use-auth";
 import "./globals.css";
 
 const onest = Onest({
@@ -28,7 +29,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${onest.variable} ${geologica.variable} h-full antialiased`}
     >
       <body className="min-h-full font-[family-name:var(--font-body)] text-[var(--pult-ink)]">
-        <TooltipProvider>{children}</TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+        </AuthProvider>
       </body>
     </html>
   );
