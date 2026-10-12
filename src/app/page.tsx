@@ -32,14 +32,11 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" className="hidden sm:inline-flex" render={<Link href="/app" />}>
-                Войти
-              </Button>
               <Button
                 className="rounded-full bg-[var(--pult-ink)] px-5 text-[var(--pult-paper)] hover:bg-[var(--pult-ink)]/90"
-                render={<Link href="/app/pipeline" />}
+                render={<Link href="/login/" />}
               >
-                Открыть сделки
+                Войти
               </Button>
             </div>
           </nav>
@@ -63,9 +60,9 @@ export default function LandingPage() {
                 <Button
                   size="lg"
                   className="rounded-full bg-[var(--pult-accent)] px-7 text-white shadow-[0_16px_40px_-18px_rgba(11,107,86,0.8)] hover:bg-[var(--pult-accent)]/90"
-                  render={<Link href="/app/pipeline" />}
+                  render={<Link href="/login/" />}
                 >
-                  Смотреть канбан
+                  Войти в салон
                 </Button>
                 <span className="text-sm text-muted-foreground">
                   Продажа · Поставка · Сервис

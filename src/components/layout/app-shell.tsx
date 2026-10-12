@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Kanban,
@@ -14,6 +14,7 @@ import {
   Package,
   Ruler,
   Wrench,
+  LogOut,
 } from "lucide-react";
 import {
   Sidebar,
@@ -34,6 +35,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/use-auth";
+import { ROLE_LABELS_AUTH } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
@@ -125,6 +128,13 @@ function NavGroup({
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout } = useAuth();
+
+  function handleLogout() {
+    logout();
+    router.replace("/login/");
+  }
 
   return (
     <SidebarProvider>
@@ -133,7 +143,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         className="border-none **:data-[slot=sidebar-inner]:bg-[rgba(247,248,246,0.86)] **:data-[slot=sidebar-inner]:backdrop-blur-xl **:data-[slot=sidebar-inner]:shadow-[var(--pult-shadow)]"
       >
         <SidebarHeader className="gap-3 px-3 pt-3">
-          <Link href="/" className="flex items-center gap-3 rounded-2xl px-1.5 py-1.5">
+          <Link href="/app/" className="flex items-center gap-3 rounded-2xl px-1.5 py-1.5">
             <span className="flex size-9 items-center justify-center rounded-xl bg-[var(--pult-ink)] text-sm font-semibold text-[var(--pult-paper)] shadow-[0_12px_28px_-14px_rgba(12,18,16,0.8)]">
               P
             </span>
@@ -160,14 +170,27 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-3">
               <Avatar className="size-9">
                 <AvatarFallback className="bg-[var(--pult-accent-soft)] text-[var(--pult-accent)] text-xs font-semibold">
-                  АК
+                  {user?.initials ?? "АК"}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-medium">Анна Крылова</div>
-                <div className="truncate text-xs text-muted-foreground">Владелец · Atelier Doors</div>
+                <div className="truncate text-sm font-medium">
+                  {user?.name ?? "Анна Крылова"}
+                </div>
+                <div className="truncate text-xs text-muted-foreground">
+                  {user ? ROLE_LABELS_AUTH[user.role] : "Владелец"} · Atelier Doors
+                </div>
               </div>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-3 w-full justify-start rounded-xl text-muted-foreground"
+              onClick={handleLogout}
+            >
+              <LogOut className="size-3.5" />
+              Выйти
+            </Button>
           </div>
         </SidebarFooter>
       </Sidebar>
