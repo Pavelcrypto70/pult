@@ -50,14 +50,10 @@ const opsNav: NavItem[] = [
     href: "/app/pipeline",
     label: "Сделки",
     icon: Kanban,
-    hint: "Канбан · 3 направления",
+    hint: "Рабочий канбан",
   },
-  {
-    href: "/app/funnel",
-    label: "Воронка",
-    icon: Sparkles,
-    hint: "Стадии и сделка",
-  },
+  // Воронка временно скрыта из меню — рабочий экран = Сделки
+  // { href: "/app/funnel", label: "Воронка", icon: Sparkles, hint: "Превью стадий" },
   { href: "/app/tasks", label: "Задачи", icon: CheckSquare },
   {
     href: "/app/archive",

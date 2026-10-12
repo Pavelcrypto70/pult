@@ -205,7 +205,7 @@ export default function PipelinePage() {
     <div>
       <PageHeader
         title="Сделки"
-        description="Канбан по направлениям: drag карточек и блоков, действия с автопереходом, конструктор полей."
+        description="Рабочий канбан: таскать карточки, действия, конструктор, закрытие в архив. Это основной раздел — не путать с воронкой-превью."
         actions={
           <div className="flex flex-wrap gap-2">
             <Button
@@ -226,6 +226,30 @@ export default function PipelinePage() {
           </div>
         }
       />
+
+      <Surface className="mb-4 p-4 sm:p-5">
+        <h2 className="font-[family-name:var(--font-display)] text-base tracking-tight">
+          Сделки и воронка — не одно и то же
+        </h2>
+        <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+          <div className="rounded-xl bg-[var(--pult-canvas)]/80 px-3 py-3">
+            <dt className="text-[11px] tracking-[0.12em] text-[var(--pult-accent)] uppercase">
+              Сделки (этот экран)
+            </dt>
+            <dd className="mt-1 text-muted-foreground">
+              Рабочий стол: канбан, drag, создание, конструктор, закрытие в архив.
+            </dd>
+          </div>
+          <div className="rounded-xl bg-[var(--pult-canvas)]/80 px-3 py-3">
+            <dt className="text-[11px] tracking-[0.12em] text-muted-foreground uppercase">
+              Воронка
+            </dt>
+            <dd className="mt-1 text-muted-foreground">
+              Превью стадий «как amo» слева направо. Из меню временно убрана — работаем здесь.
+            </dd>
+          </div>
+        </dl>
+      </Surface>
 
       <Surface className="mb-5 overflow-visible p-3 sm:p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
