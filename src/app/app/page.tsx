@@ -18,13 +18,6 @@ import {
   winRate,
   type CardFlag,
 } from "@/lib/board";
-import {
-  doorCatalog,
-  doorInstallJobs,
-  doorMeasurements,
-  doorOrders,
-  formatDoorMoney,
-} from "@/lib/doors";
 import { activity, tasks } from "@/lib/mock-data";
 import { STATUS_LABELS } from "@/lib/types";
 
@@ -66,11 +59,6 @@ export default function DashboardPage() {
   const totalAmount = live.reduce((sum, d) => sum + d.amount, 0);
   const overdueAll = live.filter((d) => d.flags.includes("overdue")).length;
   const hotTasks = tasks.filter((t) => t.status !== "done");
-  const doorPipeline = doorOrders
-    .filter((o) => o.status !== "done" && o.status !== "lost")
-    .reduce((sum, o) => sum + o.amount, 0);
-  const measuresSoon = doorMeasurements.filter((m) => m.status === "scheduled").length;
-  const installsSoon = doorInstallJobs.filter((j) => j.status === "planned").length;
 
   const topOwners = useMemo(() => {
     const map = new Map<string, { name: string; count: number; amount: number }>();
@@ -105,7 +93,7 @@ export default function DashboardPage() {
     <div>
       <PageHeader
         title="Обзор"
-        description="Общий срез салона: направления сделок, деньги, флаги, замеры и монтаж."
+        description="Общий срез салона: направления сделок, деньги, флаги и нагрузка команды."
         actions={
           <div className="flex flex-wrap gap-2">
             <Button
@@ -183,17 +171,6 @@ export default function DashboardPage() {
         <StatCard label="Сделок на досках" value={String(totalDeals)} hint="Активные, без архива" />
         <StatCard label="Сумма контура" value={formatBoardMoney(totalAmount)} hint="По карточкам канбана" />
         <StatCard label="Просрочено" value={String(overdueAll)} hint="Флаги на сделках" />
-        <StatCard label="Заказы дверей" value={formatDoorMoney(doorPipeline)} hint="Активный pipeline" />
-      </div>
-
-      <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Замеры" value={String(measuresSoon)} hint="Ближайшие выезды" />
-        <StatCard label="Слоты монтажа" value={String(installsSoon)} hint="Бригады впереди" />
-        <StatCard
-          label="На витрине"
-          value={String(doorCatalog.filter((d) => d.inShowroom).length)}
-          hint="Моделей в салоне"
-        />
         <StatCard label="Открытые задачи" value={String(hotTasks.length)} hint="По команде" />
       </div>
 

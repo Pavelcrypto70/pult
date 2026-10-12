@@ -10,10 +10,6 @@ import {
   Search,
   Command,
   Sparkles,
-  DoorOpen,
-  Package,
-  Ruler,
-  Wrench,
   LogOut,
   Archive,
 } from "lucide-react";
@@ -72,14 +68,8 @@ const opsNav: NavItem[] = [
   { href: "/app/admin", label: "Админка", icon: Settings2 },
 ];
 
-const doorNav: NavItem[] = [
-  { href: "/app/doors", label: "Витрина", icon: DoorOpen, exact: true },
-  { href: "/app/doors/orders", label: "Заказы", icon: Package },
-  { href: "/app/doors/measurements", label: "Замеры", icon: Ruler },
-  // Конфигуратор временно скрыт
-  // { href: "/app/doors/configurator", label: "Конфигуратор", icon: SlidersHorizontal },
-  { href: "/app/doors/install", label: "Монтаж", icon: Wrench },
-];
+// Витрина / каталог временно скрыты из меню
+// const doorNav: NavItem[] = [ ... /app/doors ... ];
 
 function isActive(pathname: string, item: NavItem) {
   if (item.exact || item.href === "/app") return pathname === item.href;
@@ -172,7 +162,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </SidebarHeader>
         <SidebarContent>
           <NavGroup label="Салон" items={opsNav} pathname={pathname} />
-          <NavGroup label="Каталог и сервис" items={doorNav} pathname={pathname} />
         </SidebarContent>
         <SidebarFooter className="px-3 pb-3">
           <div className="rounded-2xl border border-[var(--pult-line)] bg-white/70 p-3 shadow-[var(--pult-shadow)]">

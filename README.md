@@ -43,7 +43,4 @@ npm run dev
 | Воронка | `/app/funnel` |
 | Архив | `/app/archive` |
 | Задачи | `/app/tasks` |
-| Витрина | `/app/doors` |
-| Заказы | `/app/doors/orders` |
-| Замеры | `/app/doors/measurements` |
-| Монтаж | `/app/doors/install` |
+| Витрина / каталог | временно скрыты из меню |

@@ -159,16 +159,6 @@ export function DealDetailDialog({
             </Button>
           ) : null}
 
-          {card.doorRef ? (
-            <Button
-              variant="outline"
-              className="w-full rounded-full"
-              render={<Link href="/app/doors" />}
-            >
-              К витрине · {card.doorRef}
-            </Button>
-          ) : null}
-
           <div>
             <div className="mb-2 text-[11px] tracking-[0.12em] text-muted-foreground uppercase">
               История
