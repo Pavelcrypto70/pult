@@ -8,7 +8,6 @@ import {
   Sparkles,
   Zap,
 } from "lucide-react";
-import { ArchiveDealDialog } from "@/components/board/archive-deal-dialog";
 import { PageHeader, Surface } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,7 +43,6 @@ export default function AmoFunnelPreviewPage() {
   const board = useBoard();
   const [pipelineId, setPipelineId] = useState<DirectionId>("sales");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [archiveOpen, setArchiveOpen] = useState(false);
 
   const pipeline = PIPELINES.find((p) => p.id === pipelineId)!;
   const stages = blocksForDirection(board.state.blocks, pipelineId);
@@ -267,18 +265,14 @@ export default function AmoFunnelPreviewPage() {
                     </div>
                   ) : (
                     <p className="text-xs text-muted-foreground">
-                      На этой стадии нет авто-действий — перетащите в текущем канбане
+                      На этой стадии нет авто-действий — перетащите в разделе «Сделки»
                       или добавьте правило в конструкторе.
                     </p>
                   )}
 
-                  <Button
-                    variant="outline"
-                    className="w-full rounded-full border-[#e8c4bc] text-[#9b3a2c] hover:bg-[#fde8e4]"
-                    onClick={() => setArchiveOpen(true)}
-                  >
-                    Закрыть в архив
-                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Закрытие в архив — в меню карточки на экране «Сделки».
+                  </p>
                 </div>
               </>
             ) : (
@@ -289,18 +283,6 @@ export default function AmoFunnelPreviewPage() {
           </Surface>
         </aside>
       </div>
-
-      <ArchiveDealDialog
-        card={selected}
-        open={archiveOpen && Boolean(selected)}
-        onOpenChange={setArchiveOpen}
-        onConfirm={(input) => {
-          if (!selected) return;
-          board.archiveCard(selected.id, input);
-          setArchiveOpen(false);
-          setSelectedId(null);
-        }}
-      />
     </div>
   );
 }

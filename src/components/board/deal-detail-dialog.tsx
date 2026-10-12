@@ -201,43 +201,44 @@ export function DealDetailDialog({
             </div>
           ) : null}
 
-          {!archived && actions.length > 0 ? (
+          {!archived ? (
             <div className="space-y-2">
               <div className="text-[11px] tracking-[0.12em] text-muted-foreground uppercase">
-                Действия → следующий блок
+                Следующий шаг
               </div>
-              <div className="flex flex-col gap-2">
-                {actions.map((action) => (
-                  <Button
-                    key={action.id}
-                    className="rounded-full bg-[var(--pult-ink)] text-[var(--pult-paper)] hover:bg-[var(--pult-ink)]/90"
-                    onClick={() => onAction(action.actionId)}
-                  >
-                    {action.actionLabel}
-                  </Button>
-                ))}
-              </div>
+              {actions.length > 0 ? (
+                <div className="flex flex-col gap-2">
+                  {actions.map((action) => (
+                    <Button
+                      key={action.id}
+                      className="w-full rounded-full bg-[var(--pult-ink)] text-[var(--pult-paper)] hover:bg-[var(--pult-ink)]/90"
+                      onClick={() => onAction(action.actionId)}
+                    >
+                      {action.actionLabel}
+                    </Button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Для этого блока нет авто-действий — перенесите карточку вручную на
+                  доске.
+                </p>
+              )}
+              {onArchive ? (
+                <Button
+                  variant="outline"
+                  className="w-full rounded-full border-[#e8c4bc] text-[#9b3a2c] hover:bg-[#fde8e4]"
+                  onClick={onArchive}
+                >
+                  <Archive className="size-3.5" />
+                  Закрыть в архив
+                </Button>
+              ) : null}
             </div>
-          ) : !archived ? (
-            <p className="text-xs text-muted-foreground">
-              Для этого блока нет авто-действий — перенесите карточку вручную.
-            </p>
           ) : null}
         </div>
 
-        <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-between">
-          {!archived && onArchive ? (
-            <Button
-              variant="outline"
-              className="rounded-full border-[#e8c4bc] text-[#9b3a2c] hover:bg-[#fde8e4]"
-              onClick={onArchive}
-            >
-              <Archive className="size-3.5" />
-              В архив
-            </Button>
-          ) : (
-            <span />
-          )}
+        <DialogFooter>
           <Button variant="outline" className="rounded-full" onClick={() => onOpenChange(false)}>
             Закрыть
           </Button>
