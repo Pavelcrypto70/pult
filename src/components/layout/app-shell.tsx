@@ -55,6 +55,12 @@ const opsNav: NavItem[] = [
     icon: Kanban,
     hint: "Канбан · 3 направления",
   },
+  {
+    href: "/app/funnel",
+    label: "Воронка",
+    icon: Sparkles,
+    hint: "amo-стиль · preview",
+  },
   { href: "/app/tasks", label: "Задачи", icon: CheckSquare },
   { href: "/app/admin", label: "Админка", icon: Settings2 },
 ];
