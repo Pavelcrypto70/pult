@@ -8,11 +8,13 @@ import {
   Sparkles,
   Zap,
 } from "lucide-react";
+import { ArchiveDealDialog } from "@/components/board/archive-deal-dialog";
 import { PageHeader, Surface } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useBoard } from "@/hooks/use-board";
 import {
+  activeCards,
   blocksForDirection,
   formatBoardMoney,
   type DealCard,
@@ -42,10 +44,13 @@ export default function AmoFunnelPreviewPage() {
   const board = useBoard();
   const [pipelineId, setPipelineId] = useState<DirectionId>("sales");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [archiveOpen, setArchiveOpen] = useState(false);
 
   const pipeline = PIPELINES.find((p) => p.id === pipelineId)!;
   const stages = blocksForDirection(board.state.blocks, pipelineId);
-  const deals = board.state.cards.filter((c) => c.directionId === pipelineId);
+  const deals = activeCards(board.state.cards).filter(
+    (c) => c.directionId === pipelineId,
+  );
   const selected = deals.find((c) => c.id === selectedId) ?? null;
   const selectedStage = selected
     ? stages.find((s) => s.id === selected.blockId)
@@ -266,6 +271,14 @@ export default function AmoFunnelPreviewPage() {
                       или добавьте правило в конструкторе.
                     </p>
                   )}
+
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-full border-[#e8c4bc] text-[#9b3a2c] hover:bg-[#fde8e4]"
+                    onClick={() => setArchiveOpen(true)}
+                  >
+                    Закрыть в архив
+                  </Button>
                 </div>
               </>
             ) : (
@@ -276,6 +289,18 @@ export default function AmoFunnelPreviewPage() {
           </Surface>
         </aside>
       </div>
+
+      <ArchiveDealDialog
+        card={selected}
+        open={archiveOpen && Boolean(selected)}
+        onOpenChange={setArchiveOpen}
+        onConfirm={(input) => {
+          if (!selected) return;
+          board.archiveCard(selected.id, input);
+          setArchiveOpen(false);
+          setSelectedId(null);
+        }}
+      />
     </div>
   );
 }

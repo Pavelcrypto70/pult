@@ -15,6 +15,7 @@ import {
   Ruler,
   Wrench,
   LogOut,
+  Archive,
 } from "lucide-react";
 import {
   Sidebar,
@@ -62,6 +63,12 @@ const opsNav: NavItem[] = [
     hint: "Стадии и сделка",
   },
   { href: "/app/tasks", label: "Задачи", icon: CheckSquare },
+  {
+    href: "/app/archive",
+    label: "Архив",
+    icon: Archive,
+    hint: "Закрытые · статистика",
+  },
   { href: "/app/admin", label: "Админка", icon: Settings2 },
 ];
 

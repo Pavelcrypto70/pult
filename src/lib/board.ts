@@ -74,16 +74,40 @@ export interface CardContact {
   messenger?: string;
 }
 
+export type CloseOutcome = "won" | "lost" | "cancelled" | "duplicate" | "other";
+
+export const CLOSE_OUTCOME_LABELS: Record<CloseOutcome, string> = {
+  won: "Успех",
+  lost: "Отказ клиента",
+  cancelled: "Отмена",
+  duplicate: "Дубль",
+  other: "Прочее",
+};
+
+export const CLOSE_REASON_PRESETS = [
+  "Дорого / бюджет",
+  "Выбрали конкурента",
+  "Передумал / заморозка объекта",
+  "Не прошли по срокам",
+  "Дубль заявки",
+  "Сорвался поставщик",
+  "Иное",
+] as const;
+
 export interface CardHistoryEntry {
   id: string;
   at: string;
   userName: string;
-  kind: "action" | "manual" | "create";
+  kind: "action" | "manual" | "create" | "archive" | "restore";
   fromBlockId?: string;
   toBlockId: string;
   actionId?: string;
   actionLabel?: string;
   note?: string;
+  /** Snapshot for monthly stats — survives restore (docs/LOGIC.md §17.7) */
+  closeOutcome?: CloseOutcome;
+  closeReason?: string;
+  amountSnapshot?: number;
 }
 
 export interface DealCard {
@@ -112,6 +136,13 @@ export interface DealCard {
   createdAt: string;
   updatedAt: string;
   createdBy: string;
+  /** Archive passport — see docs/LOGIC.md §17 */
+  archivedAt?: string;
+  archivedBy?: string;
+  closeOutcome?: CloseOutcome;
+  closeReason?: string;
+  archivedFromDirectionId?: DirectionId;
+  archivedFromBlockId?: string;
 }
 
 export const FIELD_MODULE_CATALOG: {
@@ -814,6 +845,137 @@ export const INITIAL_CARDS: DealCard[] = [
     updatedAt: "2026-09-12",
     createdBy: "Павел Орлов",
   },
+  // archived samples for monthly stats
+  {
+    id: "ka1",
+    number: "480-2026",
+    directionId: "sales",
+    blockId: "sales_talk",
+    amount: 620000,
+    client: "Ирина Веснина",
+    owner: "Анна Крылова",
+    ownerInitials: "АК",
+    workType: "Консультация",
+    quantity: 3,
+    manufacturer: "Noir",
+    body: "Отказались на переговорах — ушли к конкуренту.",
+    deadline: "2026-09-01",
+    contacts: [{ name: "Ирина Веснина", phone: "+7 903 200-11-22" }],
+    documents: [],
+    responsible: ["Анна Крылова"],
+    flags: [],
+    history: [
+      hist("sales_talk", "action", "sales_quote"),
+      {
+        id: "h_arch1",
+        at: "2026-09-05T14:00:00",
+        userName: "Анна Крылова",
+        kind: "archive",
+        toBlockId: "sales_talk",
+        fromBlockId: "sales_talk",
+        note: "В архив · Отказ клиента · Выбрали конкурента",
+        closeOutcome: "lost",
+        closeReason: "Выбрали конкурента",
+        amountSnapshot: 620000,
+      },
+    ],
+    createdAt: "2026-08-20",
+    updatedAt: "2026-09-05",
+    createdBy: "Анна Крылова",
+    archivedAt: "2026-09-05",
+    archivedBy: "Анна Крылова",
+    closeOutcome: "lost",
+    closeReason: "Выбрали конкурента",
+    archivedFromDirectionId: "sales",
+    archivedFromBlockId: "sales_talk",
+  },
+  {
+    id: "ka2",
+    number: "455-2026",
+    directionId: "fulfillment",
+    blockId: "ful_in_work",
+    amount: 890000,
+    client: "ЖК «Парк» · корп. 1",
+    owner: "Илья Морозов",
+    ownerInitials: "ИМ",
+    workType: "Монтаж партии",
+    quantity: 12,
+    manufacturer: "Atelier",
+    body: "Сдано, акт подписан.",
+    deadline: "2026-08-28",
+    doorRef: "ATL-42-OAK",
+    contacts: [{ name: "Прораб Парк" }],
+    documents: [],
+    responsible: ["Илья Морозов"],
+    flags: ["fields_filled"],
+    history: [
+      hist("ful_in_work", "action", "ful_supplier"),
+      {
+        id: "h_arch2",
+        at: "2026-08-30T18:00:00",
+        userName: "Анна Крылова",
+        kind: "archive",
+        toBlockId: "ful_in_work",
+        fromBlockId: "ful_in_work",
+        note: "В архив · Успех · Сдано",
+        closeOutcome: "won",
+        closeReason: "Сдано",
+        amountSnapshot: 890000,
+      },
+    ],
+    createdAt: "2026-07-10",
+    updatedAt: "2026-08-30",
+    createdBy: "Анна Крылова",
+    archivedAt: "2026-08-30",
+    archivedBy: "Анна Крылова",
+    closeOutcome: "won",
+    closeReason: "Сдано",
+    archivedFromDirectionId: "fulfillment",
+    archivedFromBlockId: "ful_in_work",
+  },
+  {
+    id: "ka3",
+    number: "470-2026",
+    directionId: "sales",
+    blockId: "sales_quote",
+    amount: 210000,
+    client: "Пётр Мишин",
+    owner: "Мария Соколова",
+    ownerInitials: "МС",
+    workType: "КП",
+    quantity: 2,
+    manufacturer: "Natura",
+    body: "Закрыли раньше — бюджет не сошёлся.",
+    deadline: "2026-09-10",
+    contacts: [{ name: "Пётр Мишин" }],
+    documents: [],
+    responsible: ["Мария Соколова"],
+    flags: [],
+    history: [
+      hist("sales_quote", "action", "sales_measure"),
+      {
+        id: "h_arch3",
+        at: "2026-09-18T11:00:00",
+        userName: "Мария Соколова",
+        kind: "archive",
+        toBlockId: "sales_quote",
+        fromBlockId: "sales_quote",
+        note: "В архив · Отказ клиента · Дорого / бюджет",
+        closeOutcome: "lost",
+        closeReason: "Дорого / бюджет",
+        amountSnapshot: 210000,
+      },
+    ],
+    createdAt: "2026-09-01",
+    updatedAt: "2026-09-18",
+    createdBy: "Мария Соколова",
+    archivedAt: "2026-09-18",
+    archivedBy: "Мария Соколова",
+    closeOutcome: "lost",
+    closeReason: "Дорого / бюджет",
+    archivedFromDirectionId: "sales",
+    archivedFromBlockId: "sales_quote",
+  },
 ];
 
 export function formatBoardMoney(value: number): string {
@@ -833,6 +995,106 @@ export function blocksForDirection(blocks: BoardBlock[], directionId: DirectionI
   return blocks
     .filter((b) => b.directionId === directionId)
     .sort((a, b) => a.order - b.order);
+}
+
+export function isArchived(card: DealCard) {
+  return Boolean(card.archivedAt);
+}
+
+export function activeCards(cards: DealCard[]) {
+  return cards.filter((c) => !isArchived(c));
+}
+
+export function archivedCards(cards: DealCard[]) {
+  return cards
+    .filter(isArchived)
+    .slice()
+    .sort((a, b) => (b.archivedAt ?? "").localeCompare(a.archivedAt ?? ""));
+}
+
+/** YYYY-MM from archivedAt */
+export function archiveMonthKey(archivedAt: string) {
+  return archivedAt.slice(0, 7);
+}
+
+export function monthLabel(ym: string) {
+  const [y, m] = ym.split("-").map(Number);
+  const date = new Date(y, (m || 1) - 1, 1);
+  return date.toLocaleDateString("ru-RU", { month: "long", year: "numeric" });
+}
+
+export type ArchiveMonthStats = {
+  month: string;
+  wonCount: number;
+  lostCount: number;
+  cancelledCount: number;
+  otherCount: number;
+  wonAmount: number;
+  lostAmount: number;
+  earlyCloseCount: number;
+};
+
+/** Monthly stats from archive history events (not current card state). */
+export function statsForMonth(cards: DealCard[], month: string): ArchiveMonthStats {
+  let wonCount = 0;
+  let lostCount = 0;
+  let cancelledCount = 0;
+  let otherCount = 0;
+  let wonAmount = 0;
+  let lostAmount = 0;
+  let earlyCloseCount = 0;
+
+  for (const card of cards) {
+    for (const h of card.history) {
+      if (h.kind !== "archive") continue;
+      if (archiveMonthKey(h.at) !== month) continue;
+      const outcome = h.closeOutcome ?? card.closeOutcome ?? "other";
+      const amount = h.amountSnapshot ?? card.amount;
+      if (outcome === "won") {
+        wonCount += 1;
+        wonAmount += amount;
+      } else if (outcome === "lost") {
+        lostCount += 1;
+        lostAmount += amount;
+        earlyCloseCount += 1;
+      } else if (outcome === "cancelled") {
+        cancelledCount += 1;
+        lostAmount += amount;
+        earlyCloseCount += 1;
+      } else {
+        otherCount += 1;
+        if (outcome !== "duplicate") earlyCloseCount += 1;
+      }
+    }
+  }
+
+  return {
+    month,
+    wonCount,
+    lostCount,
+    cancelledCount,
+    otherCount,
+    wonAmount,
+    lostAmount,
+    earlyCloseCount,
+  };
+}
+
+export function availableArchiveMonths(cards: DealCard[]) {
+  const set = new Set<string>();
+  for (const card of cards) {
+    for (const h of card.history) {
+      if (h.kind === "archive") set.add(archiveMonthKey(h.at));
+    }
+    if (card.archivedAt) set.add(archiveMonthKey(card.archivedAt));
+  }
+  return [...set].sort().reverse();
+}
+
+export function winRate(stats: ArchiveMonthStats) {
+  const denom = stats.wonCount + stats.lostCount + stats.cancelledCount;
+  if (!denom) return null;
+  return Math.round((stats.wonCount / denom) * 100);
 }
 
 export function missingRequiredFields(

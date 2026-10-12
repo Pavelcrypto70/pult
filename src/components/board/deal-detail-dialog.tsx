@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ExternalLink, FileText } from "lucide-react";
+import { Archive, ExternalLink, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,8 +13,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  CLOSE_OUTCOME_LABELS,
   FLAG_LABELS,
   formatBoardMoney,
+  isArchived,
   type BoardBlock,
   type DealCard,
   type Direction,
@@ -38,6 +40,7 @@ export function DealDetailDialog({
   open,
   onOpenChange,
   onAction,
+  onArchive,
   actionError,
 }: {
   card: DealCard | null;
@@ -46,13 +49,15 @@ export function DealDetailDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAction: (actionId: string) => void;
+  onArchive?: () => void;
   actionError?: string[];
 }) {
   if (!card || !direction) return null;
 
-  const actions: TransitionRule[] = direction.transitions.filter(
-    (t) => t.fromBlockId === card.blockId,
-  );
+  const archived = isArchived(card);
+  const actions: TransitionRule[] = archived
+    ? []
+    : direction.transitions.filter((t) => t.fromBlockId === card.blockId);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -81,6 +86,27 @@ export function DealDetailDialog({
           ) : null}
 
           <p className="leading-relaxed text-muted-foreground">{card.body || "Без описания"}</p>
+
+          {archived ? (
+            <div className="rounded-2xl border border-[var(--pult-line)] bg-[var(--pult-canvas)]/80 p-3">
+              <div className="mb-2 text-[11px] tracking-[0.12em] text-muted-foreground uppercase">
+                Архивный паспорт
+              </div>
+              <dl className="grid gap-2">
+                <Row
+                  label="Исход"
+                  value={
+                    card.closeOutcome
+                      ? CLOSE_OUTCOME_LABELS[card.closeOutcome]
+                      : "—"
+                  }
+                />
+                <Row label="Причина" value={card.closeReason || "—"} />
+                <Row label="Закрыта" value={card.archivedAt || "—"} />
+                <Row label="Кем" value={card.archivedBy || "—"} />
+              </dl>
+            </div>
+          ) : null}
 
           <dl className="grid gap-2 rounded-2xl bg-[var(--pult-canvas)]/80 p-3">
             <Row label="Ответственный" value={card.owner} />
@@ -151,10 +177,18 @@ export function DealDetailDialog({
               {card.history.slice(0, 8).map((h) => (
                 <li key={h.id} className="rounded-xl border border-[var(--pult-line)] px-3 py-2 text-xs">
                   <div className="font-medium">
-                    {h.actionLabel ?? (h.kind === "manual" ? "Ручной перенос" : "Создание")}
+                    {h.actionLabel ??
+                      (h.kind === "manual"
+                        ? "Ручной перенос"
+                        : h.kind === "archive"
+                          ? "В архив"
+                          : h.kind === "restore"
+                            ? "Возврат"
+                            : "Создание")}
                   </div>
                   <div className="text-muted-foreground">
                     {h.userName} · {new Date(h.at).toLocaleString("ru-RU")}
+                    {h.note ? ` · ${h.note}` : ""}
                   </div>
                 </li>
               ))}
@@ -167,7 +201,7 @@ export function DealDetailDialog({
             </div>
           ) : null}
 
-          {actions.length > 0 ? (
+          {!archived && actions.length > 0 ? (
             <div className="space-y-2">
               <div className="text-[11px] tracking-[0.12em] text-muted-foreground uppercase">
                 Действия → следующий блок
@@ -184,14 +218,26 @@ export function DealDetailDialog({
                 ))}
               </div>
             </div>
-          ) : (
+          ) : !archived ? (
             <p className="text-xs text-muted-foreground">
               Для этого блока нет авто-действий — перенесите карточку вручную.
             </p>
-          )}
+          ) : null}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-between">
+          {!archived && onArchive ? (
+            <Button
+              variant="outline"
+              className="rounded-full border-[#e8c4bc] text-[#9b3a2c] hover:bg-[#fde8e4]"
+              onClick={onArchive}
+            >
+              <Archive className="size-3.5" />
+              В архив
+            </Button>
+          ) : (
+            <span />
+          )}
           <Button variant="outline" className="rounded-full" onClick={() => onOpenChange(false)}>
             Закрыть
           </Button>

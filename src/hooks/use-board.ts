@@ -5,18 +5,21 @@ import {
   type BoardBlock,
   type BoardState,
   type CardHistoryEntry,
+  type CloseOutcome,
   type DealCard,
   type Direction,
   type DirectionId,
   type FieldModuleConfig,
   type TransitionRule,
+  CLOSE_OUTCOME_LABELS,
   blocksForDirection,
   createInitialBoardState,
+  isArchived,
   missingRequiredFields,
   uid,
 } from "@/lib/board";
 
-const STORAGE_KEY = "pult-board-v1";
+const STORAGE_KEY = "pult-board-v2";
 
 function loadBoard(): BoardState {
   if (typeof window === "undefined") return createInitialBoardState();
@@ -80,7 +83,7 @@ export function useBoard() {
       setState((prev) => {
         const card = prev.cards.find((c) => c.id === cardId);
         const target = prev.blocks.find((b) => b.id === targetBlockId);
-        if (!card || !target) return prev;
+        if (!card || !target || isArchived(card)) return prev;
 
         // handoff sales → fulfillment changes direction
         const nextDirection = target.directionId;
@@ -272,6 +275,104 @@ export function useBoard() {
     [],
   );
 
+  const archiveCard = useCallback(
+    (
+      cardId: string,
+      input: {
+        closeOutcome: CloseOutcome;
+        closeReason: string;
+        userName?: string;
+      },
+    ) => {
+      setState((prev) => {
+        const card = prev.cards.find((c) => c.id === cardId);
+        if (!card || isArchived(card)) return prev;
+        const userName = input.userName ?? "Анна Крылова";
+        const archivedAt = new Date().toISOString().slice(0, 10);
+        const outcomeLabel = CLOSE_OUTCOME_LABELS[input.closeOutcome];
+        const nextCard = pushHistory(
+          {
+            ...card,
+            archivedAt,
+            archivedBy: userName,
+            closeOutcome: input.closeOutcome,
+            closeReason: input.closeReason,
+            archivedFromDirectionId: card.directionId,
+            archivedFromBlockId: card.blockId,
+          },
+          {
+            userName,
+            kind: "archive",
+            fromBlockId: card.blockId,
+            toBlockId: card.blockId,
+            note: `В архив · ${outcomeLabel}${input.closeReason ? ` · ${input.closeReason}` : ""}`,
+            closeOutcome: input.closeOutcome,
+            closeReason: input.closeReason,
+            amountSnapshot: card.amount,
+          },
+        );
+        return {
+          ...prev,
+          cards: prev.cards.map((c) => (c.id === cardId ? nextCard : c)),
+        };
+      });
+    },
+    [],
+  );
+
+  const restoreCard = useCallback(
+    (
+      cardId: string,
+      input?: {
+        directionId?: DirectionId;
+        blockId?: string;
+        note?: string;
+        userName?: string;
+      },
+    ) => {
+      setState((prev) => {
+        const card = prev.cards.find((c) => c.id === cardId);
+        if (!card || !isArchived(card)) return prev;
+
+        const directionId =
+          input?.directionId ?? card.archivedFromDirectionId ?? card.directionId;
+        const preferredBlock =
+          input?.blockId ?? card.archivedFromBlockId ?? card.blockId;
+        const dirBlocks = blocksForDirection(prev.blocks, directionId);
+        const blockExists = dirBlocks.some((b) => b.id === preferredBlock);
+        const blockId = blockExists ? preferredBlock : dirBlocks[0]?.id;
+        if (!blockId) return prev;
+
+        const userName = input?.userName ?? "Анна Крылова";
+        const nextCard = pushHistory(
+          {
+            ...card,
+            directionId,
+            blockId,
+            archivedAt: undefined,
+            archivedBy: undefined,
+            closeOutcome: undefined,
+            closeReason: undefined,
+            archivedFromDirectionId: undefined,
+            archivedFromBlockId: undefined,
+          },
+          {
+            userName,
+            kind: "restore",
+            fromBlockId: card.blockId,
+            toBlockId: blockId,
+            note: input?.note?.trim() || "Возврат из архива на доску",
+          },
+        );
+        return {
+          ...prev,
+          cards: prev.cards.map((c) => (c.id === cardId ? nextCard : c)),
+        };
+      });
+    },
+    [],
+  );
+
   return {
     ready,
     state,
@@ -285,6 +386,8 @@ export function useBoard() {
     deleteBlock,
     updateDirectionTemplate,
     updateTransitions,
+    archiveCard,
+    restoreCard,
   };
 }
 

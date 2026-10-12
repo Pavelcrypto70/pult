@@ -40,6 +40,8 @@ npm run dev
 | Вход | `/login` |
 | Обзор | `/app` |
 | Сделки | `/app/pipeline` |
+| Воронка | `/app/funnel` |
+| Архив | `/app/archive` |
 | Задачи | `/app/tasks` |
 | Витрина | `/app/doors` |
 | Заказы | `/app/doors/orders` |

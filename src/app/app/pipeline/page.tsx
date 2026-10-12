@@ -11,6 +11,7 @@ import {
   Settings2,
   SlidersHorizontal,
 } from "lucide-react";
+import { ArchiveDealDialog } from "@/components/board/archive-deal-dialog";
 import { BoardConstructorDialog } from "@/components/board/board-constructor-dialog";
 import { CreateDealDialog } from "@/components/board/create-deal-dialog";
 import { DealDetailDialog } from "@/components/board/deal-detail-dialog";
@@ -21,8 +22,10 @@ import { Input } from "@/components/ui/input";
 import { useBoard } from "@/hooks/use-board";
 import {
   FLAG_LABELS,
+  activeCards,
   blocksForDirection,
   formatBoardMoney,
+  isArchived,
   type CardFlag,
   type DealCard,
   type DirectionId,
@@ -51,6 +54,7 @@ export default function PipelinePage() {
   const [createBlockId, setCreateBlockId] = useState<string | undefined>();
   const [constructorOpen, setConstructorOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [archiveId, setArchiveId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string[] | undefined>();
   const [dropTarget, setDropTarget] = useState<string | null>(null);
   const [dropDenied, setDropDenied] = useState(false);
@@ -70,9 +74,14 @@ export default function PipelinePage() {
   const active = board.state.directions.find((d) => d.id === direction)!;
   const columns = blocksForDirection(board.state.blocks, direction);
 
+  const liveCards = useMemo(
+    () => activeCards(board.state.cards),
+    [board.state.cards],
+  );
+
   const deals = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return board.state.cards.filter((deal) => {
+    return liveCards.filter((deal) => {
       if (deal.directionId !== direction) return false;
       if (!q) return true;
       return (
@@ -84,10 +93,11 @@ export default function PipelinePage() {
         deal.body.toLowerCase().includes(q)
       );
     });
-  }, [board.state.cards, direction, query]);
+  }, [liveCards, direction, query]);
 
   const boardTotal = deals.reduce((sum, d) => sum + d.amount, 0);
   const selected = board.state.cards.find((c) => c.id === selectedId) ?? null;
+  const archiveCard = board.state.cards.find((c) => c.id === archiveId) ?? null;
   const selectedBlock = selected
     ? board.state.blocks.find((b) => b.id === selected.blockId)
     : undefined;
@@ -146,7 +156,7 @@ export default function PipelinePage() {
     if (payload.type === "card") {
       const card = board.state.cards.find((c) => c.id === payload.cardId);
       const target = board.state.blocks.find((b) => b.id === targetBlockId);
-      if (!card || !target) return;
+      if (!card || !target || isArchived(card)) return;
       if (target.directionId !== card.directionId) {
         setDropDenied(true);
         window.setTimeout(() => setDropDenied(false), 900);
@@ -247,7 +257,7 @@ export default function PipelinePage() {
                 />
                 <div className="absolute top-[calc(100%+8px)] left-0 z-30 w-[min(100vw-2rem,360px)] overflow-hidden rounded-[1.25rem] border border-[var(--pult-line)] bg-white shadow-[var(--pult-shadow-lg)]">
                   {board.state.directions.map((item) => {
-                    const count = board.state.cards.filter(
+                    const count = liveCards.filter(
                       (d) => d.directionId === item.id,
                     ).length;
                     const selectedDir = item.id === direction;
@@ -549,7 +559,25 @@ export default function PipelinePage() {
           }
         }}
         onAction={handleAction}
+        onArchive={() => {
+          if (selected) setArchiveId(selected.id);
+        }}
         actionError={actionError}
+      />
+
+      <ArchiveDealDialog
+        card={archiveCard}
+        open={Boolean(archiveCard)}
+        onOpenChange={(open) => {
+          if (!open) setArchiveId(null);
+        }}
+        onConfirm={(input) => {
+          if (!archiveCard) return;
+          board.archiveCard(archiveCard.id, input);
+          setArchiveId(null);
+          setSelectedId(null);
+          setActionError(undefined);
+        }}
       />
 
       <BoardConstructorDialog

@@ -24,6 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useBoard } from "@/hooks/use-board";
+import { activeCards } from "@/lib/board";
 import { clientById, memberById, tasks as seedTasks, team } from "@/lib/mock-data";
 import {
   PRIORITY_LABELS,
@@ -68,7 +69,7 @@ export default function TasksPage() {
   const selected = memberById(selectedId) ?? activeTeam[0];
   const dealOptions = useMemo(
     () =>
-      board.state.cards
+      activeCards(board.state.cards)
         .slice()
         .sort((a, b) => a.number.localeCompare(b.number, "ru"))
         .map((c) => ({ id: c.id, label: `${c.number} · ${c.client}` })),

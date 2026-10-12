@@ -1,16 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
-import { AlertTriangle, CircleDollarSign, Layers3 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { AlertTriangle, Archive, CircleDollarSign, Layers3 } from "lucide-react";
 import { PageHeader, StatCard, Surface } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useBoard } from "@/hooks/use-board";
 import {
   FLAG_LABELS,
+  activeCards,
+  availableArchiveMonths,
   blocksForDirection,
   formatBoardMoney,
+  monthLabel,
+  statsForMonth,
+  winRate,
   type CardFlag,
 } from "@/lib/board";
 import {
@@ -25,10 +30,23 @@ import { STATUS_LABELS } from "@/lib/types";
 
 export default function DashboardPage() {
   const board = useBoard();
+  const live = useMemo(() => activeCards(board.state.cards), [board.state.cards]);
+  const months = useMemo(
+    () => availableArchiveMonths(board.state.cards),
+    [board.state.cards],
+  );
+  const [statsMonth, setStatsMonth] = useState<string>("");
+  const selectedMonth =
+    statsMonth || months[0] || new Date().toISOString().slice(0, 7);
+  const monthStats = useMemo(
+    () => statsForMonth(board.state.cards, selectedMonth),
+    [board.state.cards, selectedMonth],
+  );
+  const conversion = winRate(monthStats);
 
   const byDirection = useMemo(() => {
     return board.state.directions.map((dir) => {
-      const dirDeals = board.state.cards.filter((d) => d.directionId === dir.id);
+      const dirDeals = live.filter((d) => d.directionId === dir.id);
       const amount = dirDeals.reduce((sum, d) => sum + d.amount, 0);
       const overdue = dirDeals.filter((d) => d.flags.includes("overdue")).length;
       const urgent = dirDeals.filter((d) => d.flags.includes("urgent")).length;
@@ -42,11 +60,11 @@ export default function DashboardPage() {
       });
       return { ...dir, deals: dirDeals, amount, overdue, urgent, columns };
     });
-  }, [board.state]);
+  }, [board.state.directions, board.state.blocks, live]);
 
-  const totalDeals = board.state.cards.length;
-  const totalAmount = board.state.cards.reduce((sum, d) => sum + d.amount, 0);
-  const overdueAll = board.state.cards.filter((d) => d.flags.includes("overdue")).length;
+  const totalDeals = live.length;
+  const totalAmount = live.reduce((sum, d) => sum + d.amount, 0);
+  const overdueAll = live.filter((d) => d.flags.includes("overdue")).length;
   const hotTasks = tasks.filter((t) => t.status !== "done");
   const doorPipeline = doorOrders
     .filter((o) => o.status !== "done" && o.status !== "lost")
@@ -56,24 +74,24 @@ export default function DashboardPage() {
 
   const topOwners = useMemo(() => {
     const map = new Map<string, { name: string; count: number; amount: number }>();
-    for (const deal of board.state.cards) {
+    for (const deal of live) {
       const prev = map.get(deal.owner) ?? { name: deal.owner, count: 0, amount: 0 };
       prev.count += 1;
       prev.amount += deal.amount;
       map.set(deal.owner, prev);
     }
     return [...map.values()].sort((a, b) => b.amount - a.amount).slice(0, 5);
-  }, [board.state.cards]);
+  }, [live]);
 
   const flagStats = useMemo(() => {
     const map = new Map<CardFlag, number>();
-    for (const deal of board.state.cards) {
+    for (const deal of live) {
       for (const flag of deal.flags) {
         map.set(flag, (map.get(flag) ?? 0) + 1);
       }
     }
     return [...map.entries()].sort((a, b) => b[1] - a[1]);
-  }, [board.state.cards]);
+  }, [live]);
 
   if (!board.ready) {
     return (
@@ -89,17 +107,80 @@ export default function DashboardPage() {
         title="Обзор"
         description="Общий срез салона: направления сделок, деньги, флаги, замеры и монтаж."
         actions={
-          <Button
-            className="rounded-full bg-[var(--pult-ink)] px-5 text-[var(--pult-paper)] hover:bg-[var(--pult-ink)]/90"
-            render={<Link href="/app/pipeline" />}
-          >
-            К сделкам
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              className="rounded-full"
+              render={<Link href="/app/archive" />}
+            >
+              Архив
+            </Button>
+            <Button
+              className="rounded-full bg-[var(--pult-ink)] px-5 text-[var(--pult-paper)] hover:bg-[var(--pult-ink)]/90"
+              render={<Link href="/app/pipeline" />}
+            >
+              К сделкам
+            </Button>
+          </div>
         }
       />
 
+      <Surface className="mb-6 p-5 sm:p-6">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <Archive className="size-4 text-[var(--pult-accent)]" />
+            <h2 className="font-[family-name:var(--font-display)] text-lg">
+              Закрытые за месяц
+            </h2>
+          </div>
+          <select
+            className="h-9 rounded-xl border border-[var(--pult-line)] bg-white px-3 text-sm"
+            value={selectedMonth}
+            onChange={(e) => setStatsMonth(e.target.value)}
+          >
+            {(months.length ? months : [selectedMonth]).map((m) => (
+              <option key={m} value={m}>
+                {monthLabel(m)}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            label="Выручка"
+            value={formatBoardMoney(monthStats.wonAmount)}
+            hint={`${monthStats.wonCount} успехов`}
+          />
+          <StatCard
+            label="Потеряно"
+            value={formatBoardMoney(monthStats.lostAmount)}
+            hint={`${monthStats.lostCount + monthStats.cancelledCount} отказов`}
+          />
+          <StatCard
+            label="Конверсия"
+            value={conversion == null ? "—" : `${conversion}%`}
+            hint="won / (won+lost+cancelled)"
+          />
+          <StatCard
+            label="Раннее закрытие"
+            value={String(monthStats.earlyCloseCount)}
+            hint="Отказы и отмены"
+          />
+        </div>
+        <div className="mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-full"
+            render={<Link href="/app/archive" />}
+          >
+            Открыть архив
+          </Button>
+        </div>
+      </Surface>
+
       <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Сделок на досках" value={String(totalDeals)} hint="Все направления" />
+        <StatCard label="Сделок на досках" value={String(totalDeals)} hint="Активные, без архива" />
         <StatCard label="Сумма контура" value={formatBoardMoney(totalAmount)} hint="По карточкам канбана" />
         <StatCard label="Просрочено" value={String(overdueAll)} hint="Флаги на сделках" />
         <StatCard label="Заказы дверей" value={formatDoorMoney(doorPipeline)} hint="Активный pipeline" />
