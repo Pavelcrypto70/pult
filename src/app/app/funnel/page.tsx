@@ -270,9 +270,6 @@ export default function AmoFunnelPreviewPage() {
                     </p>
                   )}
 
-                  <p className="text-xs text-muted-foreground">
-                    Закрытие в архив — в меню карточки на экране «Сделки».
-                  </p>
                 </div>
               </>
             ) : (
