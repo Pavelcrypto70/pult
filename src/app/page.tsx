@@ -73,7 +73,7 @@ export default function LandingPage() {
             <div className="pult-glass rounded-[1.6rem] p-5 sm:p-6 pult-rise-3">
               <div className="mb-4 flex items-center justify-between">
                 <span className="text-xs tracking-[0.16em] text-muted-foreground uppercase">
-                  Live preview
+                  Сейчас в салоне
                 </span>
                 <span className="rounded-full bg-[var(--pult-accent-soft)] px-2.5 py-1 text-[11px] font-medium text-[var(--pult-accent)]">
                   online

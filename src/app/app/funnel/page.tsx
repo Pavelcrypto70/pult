@@ -20,26 +20,21 @@ import {
 } from "@/lib/board";
 import { cn } from "@/lib/utils";
 
-/**
- * Preview: Пульт на логике amoCRM —
- * одна воронка (направление) = стадии, сделка в центре, чат и робот на стадии.
- */
-
 const PIPELINES: { id: DirectionId; label: string; robotHint: string }[] = [
   {
     id: "sales",
-    label: "Воронка · Продажа дверей",
-    robotHint: "Робот: после «Предоплата» → задача менеджеру + шаблон в Max",
+    label: "Продажа дверей",
+    robotHint: "После «Предоплата» → задача менеджеру + шаблон в Max",
   },
   {
     id: "fulfillment",
-    label: "Воронка · Поставка / монтаж",
-    robotHint: "Робот: вход в «У поставщика» → статус клиенту в Max",
+    label: "Поставка / монтаж",
+    robotHint: "Вход в «У поставщика» → статус клиенту в Max",
   },
   {
     id: "warranty",
-    label: "Воронка · Сервис",
-    robotHint: "Робот: новое обращение → задача сервису",
+    label: "Сервис",
+    robotHint: "Новое обращение → задача сервису",
   },
 ];
 
@@ -77,12 +72,7 @@ export default function AmoFunnelPreviewPage() {
     <div>
       <PageHeader
         title="Воронка"
-        description="Превью: Пульт на логике amo — стадии слева направо, сделка в центре, чат и робот на стадии. Не замена текущего канбана, а вариант основы."
-        actions={
-          <Badge className="rounded-full bg-[var(--pult-accent-soft)] text-[var(--pult-accent)]">
-            amo-основа · preview
-          </Badge>
-        }
+        description="Стадии слева направо, сделка в центре, чат и автоматизации на стадии."
       />
 
       <Surface className="mb-4 p-3 sm:p-4">
@@ -103,7 +93,7 @@ export default function AmoFunnelPreviewPage() {
                     : "bg-[var(--pult-canvas)] text-muted-foreground hover:text-[var(--pult-ink)]",
                 )}
               >
-                {p.label.replace("Воронка · ", "")}
+                {p.label}
               </button>
             ))}
           </div>
@@ -146,7 +136,7 @@ export default function AmoFunnelPreviewPage() {
                     </div>
                   </div>
                   <span
-                    title="На стадии может висеть робот"
+                    title="Автоматика на стадии"
                     className="inline-flex size-6 items-center justify-center rounded-full bg-[var(--pult-canvas)] text-[var(--pult-accent)]"
                   >
                     <Zap className="size-3" />
@@ -219,7 +209,7 @@ export default function AmoFunnelPreviewPage() {
                   <div className="rounded-2xl border border-[var(--pult-line)] bg-[var(--pult-canvas)]/60 p-3">
                     <div className="mb-2 flex items-center gap-2 text-[11px] tracking-[0.12em] text-muted-foreground uppercase">
                       <MessageCircle className="size-3.5 text-[var(--pult-accent)]" />
-                      Чат сделки (amo-стиль)
+                      Чат сделки
                     </div>
                     <div className="space-y-2 text-xs">
                       <div className="max-w-[90%] rounded-2xl rounded-tl-sm bg-white px-3 py-2 shadow-sm">
@@ -251,7 +241,7 @@ export default function AmoFunnelPreviewPage() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-[11px] tracking-[0.12em] text-muted-foreground uppercase">
                         <Sparkles className="size-3.5 text-[var(--pult-gold)]" />
-                        Следующий шаг (= смена стадии)
+                        Следующий шаг
                       </div>
                       {actions.map((a) => (
                         <Button
@@ -280,8 +270,7 @@ export default function AmoFunnelPreviewPage() {
               </>
             ) : (
               <div className="px-5 py-16 text-center text-sm text-muted-foreground">
-                Выберите сделку в воронке — справа откроются поля, чат и шаги
-                как в amo.
+                Выберите сделку в воронке — справа откроются поля, чат и шаги.
               </div>
             )}
           </Surface>

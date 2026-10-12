@@ -59,7 +59,7 @@ const opsNav: NavItem[] = [
     href: "/app/funnel",
     label: "Воронка",
     icon: Sparkles,
-    hint: "amo-стиль · preview",
+    hint: "Стадии и сделка",
   },
   { href: "/app/tasks", label: "Задачи", icon: CheckSquare },
   { href: "/app/admin", label: "Админка", icon: Settings2 },
