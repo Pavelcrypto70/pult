@@ -19,10 +19,16 @@ import { team } from "@/lib/mock-data";
 import { ROLE_LABELS } from "@/lib/types";
 
 const integrations = [
-  { name: "Telegram", status: "Подключено", detail: "Алерты по сделкам и монтажу" },
-  { name: "Почта", status: "Черновик", detail: "Заявки с сайта салона" },
-  { name: "ЮKassa", status: "Скоро", detail: "Предоплаты по заказам дверей" },
-  { name: "Webhooks", status: "Доступно", detail: "Статусы поставки наружу" },
+  {
+    name: "Max",
+    status: "Черновик",
+    detail: "Диалоги с клиентом, уведомления при смене блока сделки",
+  },
+  {
+    name: "Сайт",
+    status: "Черновик",
+    detail: "Заявки с сайта салона в канбан «Продажа»",
+  },
 ];
 
 export default function AdminPage() {
