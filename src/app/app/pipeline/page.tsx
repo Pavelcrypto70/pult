@@ -249,14 +249,74 @@ export default function PipelinePage() {
       <Surface className="mb-5 overflow-visible p-3 sm:p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-            <div className="relative min-w-[200px] flex-1 sm:max-w-xs">
-              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Поиск сделки, клиента, артикула…"
-                className="rounded-full bg-white pl-9"
-              />
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen((v) => !v);
+                  setBlocksMenuOpen(false);
+                }}
+                className="inline-flex min-h-11 w-full items-center gap-2 rounded-full border border-[var(--pult-line)] bg-[linear-gradient(135deg,rgba(11,107,86,0.12),rgba(154,123,79,0.1),rgba(255,255,255,0.95))] px-4 py-2.5 text-left transition-shadow hover:shadow-[var(--pult-shadow)] sm:min-w-[240px]"
+              >
+                <SlidersHorizontal className="size-4 shrink-0 text-[var(--pult-accent)]" />
+                <span className="min-w-0 flex-1 truncate text-sm font-medium tracking-wide uppercase">
+                  {active.label}
+                </span>
+                <ChevronDown
+                  className={cn(
+                    "size-4 shrink-0 text-muted-foreground transition-transform",
+                    menuOpen && "rotate-180",
+                  )}
+                />
+              </button>
+
+              {menuOpen ? (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Закрыть меню направлений"
+                    className="fixed inset-0 z-20 cursor-default"
+                    onClick={() => setMenuOpen(false)}
+                  />
+                  <div className="absolute top-[calc(100%+8px)] left-0 z-30 w-[min(100vw-2rem,360px)] overflow-hidden rounded-[1.25rem] border border-[var(--pult-line)] bg-white shadow-[var(--pult-shadow-lg)]">
+                    {board.state.directions.map((item) => {
+                      const count = liveCards.filter(
+                        (d) => d.directionId === item.id,
+                      ).length;
+                      const selectedDir = item.id === direction;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => {
+                            setDirection(item.id);
+                            setMenuOpen(false);
+                          }}
+                          className={cn(
+                            "flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left text-sm transition-colors",
+                            selectedDir
+                              ? "bg-[var(--pult-accent-soft)]/70 font-medium text-[var(--pult-ink)]"
+                              : "text-[var(--pult-ink-soft)] hover:bg-[var(--pult-canvas)]",
+                          )}
+                        >
+                          <span className="tracking-[0.04em] uppercase">
+                            {item.label}
+                          </span>
+                          <Badge
+                            variant="secondary"
+                            className={cn(
+                              "rounded-full",
+                              selectedDir && "bg-white text-[var(--pult-accent)]",
+                            )}
+                          >
+                            {count}
+                          </Badge>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : null}
             </div>
 
             <div className="relative shrink-0">
@@ -344,74 +404,14 @@ export default function PipelinePage() {
               ) : null}
             </div>
 
-            <div className="relative shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen((v) => !v);
-                  setBlocksMenuOpen(false);
-                }}
-                className="inline-flex min-h-11 w-full items-center gap-2 rounded-full border border-[var(--pult-line)] bg-[linear-gradient(135deg,rgba(11,107,86,0.12),rgba(154,123,79,0.1),rgba(255,255,255,0.95))] px-4 py-2.5 text-left transition-shadow hover:shadow-[var(--pult-shadow)] sm:min-w-[240px]"
-              >
-                <SlidersHorizontal className="size-4 shrink-0 text-[var(--pult-accent)]" />
-                <span className="min-w-0 flex-1 truncate text-sm font-medium tracking-wide uppercase">
-                  {active.label}
-                </span>
-                <ChevronDown
-                  className={cn(
-                    "size-4 shrink-0 text-muted-foreground transition-transform",
-                    menuOpen && "rotate-180",
-                  )}
-                />
-              </button>
-
-              {menuOpen ? (
-                <>
-                  <button
-                    type="button"
-                    aria-label="Закрыть меню направлений"
-                    className="fixed inset-0 z-20 cursor-default"
-                    onClick={() => setMenuOpen(false)}
-                  />
-                  <div className="absolute top-[calc(100%+8px)] left-0 z-30 w-[min(100vw-2rem,360px)] overflow-hidden rounded-[1.25rem] border border-[var(--pult-line)] bg-white shadow-[var(--pult-shadow-lg)]">
-                    {board.state.directions.map((item) => {
-                      const count = liveCards.filter(
-                        (d) => d.directionId === item.id,
-                      ).length;
-                      const selectedDir = item.id === direction;
-                      return (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => {
-                            setDirection(item.id);
-                            setMenuOpen(false);
-                          }}
-                          className={cn(
-                            "flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left text-sm transition-colors",
-                            selectedDir
-                              ? "bg-[var(--pult-accent-soft)]/70 font-medium text-[var(--pult-ink)]"
-                              : "text-[var(--pult-ink-soft)] hover:bg-[var(--pult-canvas)]",
-                          )}
-                        >
-                          <span className="tracking-[0.04em] uppercase">
-                            {item.label}
-                          </span>
-                          <Badge
-                            variant="secondary"
-                            className={cn(
-                              "rounded-full",
-                              selectedDir && "bg-white text-[var(--pult-accent)]",
-                            )}
-                          >
-                            {count}
-                          </Badge>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </>
-              ) : null}
+            <div className="relative min-w-[200px] flex-1 sm:max-w-xs">
+              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Поиск сделки, клиента, артикула…"
+                className="rounded-full bg-white pl-9"
+              />
             </div>
           </div>
 
