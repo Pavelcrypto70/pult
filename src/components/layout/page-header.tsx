@@ -32,12 +32,15 @@ export function PageHeader({
 export function Surface({
   className,
   children,
+  style,
 }: {
   className?: string;
   children: React.ReactNode;
+  style?: React.CSSProperties;
 }) {
   return (
     <div
+      style={style}
       className={cn(
         "rounded-[1.35rem] border border-[var(--pult-line)] bg-white/80 shadow-[var(--pult-shadow)] backdrop-blur-sm",
         className,

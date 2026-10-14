@@ -217,6 +217,21 @@
   }
 }
 
+@keyframes pult-chart-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pult-chart-rise {
+  animation: pult-chart-rise 0.55s ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pult-fade,
   .pult-rise,
@@ -224,7 +239,8 @@
   .pult-rise-3,
   .pult-rise-4,
   .pult-orbit,
-  .pult-orbit-slow {
+  .pult-orbit-slow,
+  .pult-chart-rise {
     animation: none;
   }
 }
