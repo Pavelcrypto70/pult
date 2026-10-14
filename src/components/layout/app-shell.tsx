@@ -150,8 +150,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div className="font-[family-name:var(--font-display)] text-[15px] tracking-tight">
                 Пульт
               </div>
-              <div className="text-[10px] tracking-[0.16em] text-muted-foreground uppercase">
-                Door Salon
+              <div className="text-[10px] tracking-wide text-muted-foreground">
+                шикардорс.рф
               </div>
             </div>
           </Link>

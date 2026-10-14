@@ -64,8 +64,8 @@ export default function LoginPage() {
               <span className="block font-[family-name:var(--font-display)] text-xl tracking-tight">
                 Пульт
               </span>
-              <span className="block text-[10px] tracking-[0.16em] text-muted-foreground uppercase">
-                Door Salon
+              <span className="block text-[10px] tracking-wide text-muted-foreground">
+                шикардорс.рф
               </span>
             </span>
           </Link>

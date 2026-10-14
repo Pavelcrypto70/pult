@@ -26,8 +26,8 @@ export default function LandingPage() {
                 <div className="font-[family-name:var(--font-display)] text-lg tracking-tight">
                   Пульт
                 </div>
-                <div className="text-[11px] tracking-[0.14em] text-muted-foreground uppercase">
-                  Door Salon
+                <div className="text-[11px] tracking-wide text-muted-foreground">
+                  шикардорс.рф
                 </div>
               </div>
             </div>
