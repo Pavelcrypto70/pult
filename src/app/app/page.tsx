@@ -37,6 +37,10 @@ export default function DashboardPage() {
     [board.state.cards],
   );
   const [statsMonth, setStatsMonth] = useState<string>("");
+  /** Open direction cards on overview */
+  const [openDirections, setOpenDirections] = useState<Record<string, boolean>>(
+    {},
+  );
   /** Open stage dropdowns on overview — key = `${directionId}:${blockId}` */
   const [openStages, setOpenStages] = useState<Record<string, boolean>>({});
   const selectedMonth =
@@ -65,6 +69,10 @@ export default function DashboardPage() {
       return { ...dir, deals: dirDeals, amount, overdue, urgent, columns };
     });
   }, [board.state.directions, board.state.blocks, live]);
+
+  function toggleDirection(id: string) {
+    setOpenDirections((prev) => ({ ...prev, [id]: !prev[id] }));
+  }
 
   function toggleStage(key: string) {
     setOpenStages((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -190,113 +198,138 @@ export default function DashboardPage() {
       </div>
 
       <div className="mb-6 grid gap-4 lg:grid-cols-3">
-        {byDirection.map((dir) => (
-          <Surface key={dir.id} className="overflow-hidden p-0">
-            <div className="border-b border-[var(--pult-line)] bg-[linear-gradient(135deg,rgba(11,107,86,0.08),rgba(154,123,79,0.08),rgba(255,255,255,0.9))] px-5 py-4">
-              <div className="text-[11px] tracking-[0.14em] text-muted-foreground uppercase">
-                Направление
-              </div>
-              <h2 className="mt-1 font-[family-name:var(--font-display)] text-xl tracking-tight">
-                {dir.short}
-              </h2>
-              <p className="mt-1 text-xs text-muted-foreground">{dir.label}</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Badge variant="secondary" className="rounded-full">
-                  {dir.deals.length} сделок
-                </Badge>
-                <Badge className="rounded-full bg-[var(--pult-accent-soft)] text-[var(--pult-accent)]">
-                  {formatBoardMoney(dir.amount)}
-                </Badge>
-                {dir.overdue > 0 ? (
-                  <Badge className="rounded-full bg-[#fde8e4] text-[#9b3a2c]">
-                    {dir.overdue} просроч.
-                  </Badge>
-                ) : null}
-                {dir.urgent > 0 ? (
-                  <Badge className="rounded-full bg-[#ffe8d6] text-[var(--pult-warm)]">
-                    {dir.urgent} срочно
-                  </Badge>
-                ) : null}
-              </div>
-            </div>
-            <div className="space-y-2 p-4">
-              {dir.columns.map((col) => {
-                const stageKey = `${dir.id}:${col.id}`;
-                const open = Boolean(openStages[stageKey]);
-                return (
-                  <div
-                    key={col.id}
-                    className="overflow-hidden rounded-xl bg-[var(--pult-canvas)]/70"
-                  >
-                    <button
-                      type="button"
-                      aria-expanded={open}
-                      onClick={() => toggleStage(stageKey)}
-                      className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left transition-colors hover:bg-black/[0.03]"
-                    >
-                      <div className="flex min-w-0 items-center gap-2">
-                        <span
-                          className="size-2.5 shrink-0 rounded-full"
-                          style={{ background: col.color }}
-                        />
-                        <span className="truncate text-xs font-medium">
-                          {col.title}
-                        </span>
-                      </div>
-                      <div className="flex shrink-0 items-center gap-2 text-xs">
-                        <div className="text-right">
-                          <div className="font-medium">{col.count}</div>
-                          <div className="text-muted-foreground">
-                            {formatBoardMoney(col.amount)}
-                          </div>
-                        </div>
-                        <ChevronDown
-                          className={cn(
-                            "size-3.5 text-muted-foreground transition-transform duration-200",
-                            open && "rotate-180",
-                          )}
-                        />
-                      </div>
-                    </button>
-                    {open ? (
-                      <div className="border-t border-[var(--pult-line)]/80 px-3 py-2">
-                        {col.deals.length === 0 ? (
-                          <p className="py-1 text-xs text-muted-foreground">
-                            Нет сделок в этапе
-                          </p>
-                        ) : (
-                          <ul className="space-y-1.5">
-                            {col.deals.map((deal) => (
-                              <li key={deal.id}>
-                                <Link
-                                  href="/app/pipeline"
-                                  className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-xs transition-colors hover:bg-white/80"
-                                >
-                                  <span className="min-w-0 truncate">
-                                    <span className="font-medium text-[var(--pult-ink)]">
-                                      {deal.number}
-                                    </span>
-                                    <span className="text-muted-foreground">
-                                      {" "}
-                                      · {deal.client}
-                                    </span>
-                                  </span>
-                                  <span className="shrink-0 text-muted-foreground">
-                                    {formatBoardMoney(deal.amount)}
-                                  </span>
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    ) : null}
+        {byDirection.map((dir) => {
+          const dirOpen = Boolean(openDirections[dir.id]);
+          return (
+            <Surface key={dir.id} className="overflow-hidden p-0">
+              <button
+                type="button"
+                aria-expanded={dirOpen}
+                onClick={() => toggleDirection(dir.id)}
+                className={cn(
+                  "w-full bg-[linear-gradient(135deg,rgba(11,107,86,0.08),rgba(154,123,79,0.08),rgba(255,255,255,0.9))] px-5 py-4 text-left transition-colors hover:brightness-[0.99]",
+                  dirOpen && "border-b border-[var(--pult-line)]",
+                )}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-[11px] tracking-[0.14em] text-muted-foreground uppercase">
+                      Направление
+                    </div>
+                    <h2 className="mt-1 font-[family-name:var(--font-display)] text-xl tracking-tight">
+                      {dir.short}
+                    </h2>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {dir.label}
+                    </p>
                   </div>
-                );
-              })}
-            </div>
-          </Surface>
-        ))}
+                  <ChevronDown
+                    className={cn(
+                      "mt-1 size-4 shrink-0 text-muted-foreground transition-transform duration-200",
+                      dirOpen && "rotate-180",
+                    )}
+                  />
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Badge variant="secondary" className="rounded-full">
+                    {dir.deals.length} сделок
+                  </Badge>
+                  <Badge className="rounded-full bg-[var(--pult-accent-soft)] text-[var(--pult-accent)]">
+                    {formatBoardMoney(dir.amount)}
+                  </Badge>
+                  {dir.overdue > 0 ? (
+                    <Badge className="rounded-full bg-[#fde8e4] text-[#9b3a2c]">
+                      {dir.overdue} просроч.
+                    </Badge>
+                  ) : null}
+                  {dir.urgent > 0 ? (
+                    <Badge className="rounded-full bg-[#ffe8d6] text-[var(--pult-warm)]">
+                      {dir.urgent} срочно
+                    </Badge>
+                  ) : null}
+                </div>
+              </button>
+              {dirOpen ? (
+                <div className="space-y-2 p-4">
+                  {dir.columns.map((col) => {
+                    const stageKey = `${dir.id}:${col.id}`;
+                    const open = Boolean(openStages[stageKey]);
+                    return (
+                      <div
+                        key={col.id}
+                        className="overflow-hidden rounded-xl bg-[var(--pult-canvas)]/70"
+                      >
+                        <button
+                          type="button"
+                          aria-expanded={open}
+                          onClick={() => toggleStage(stageKey)}
+                          className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left transition-colors hover:bg-black/[0.03]"
+                        >
+                          <div className="flex min-w-0 items-center gap-2">
+                            <span
+                              className="size-2.5 shrink-0 rounded-full"
+                              style={{ background: col.color }}
+                            />
+                            <span className="truncate text-xs font-medium">
+                              {col.title}
+                            </span>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-2 text-xs">
+                            <div className="text-right">
+                              <div className="font-medium">{col.count}</div>
+                              <div className="text-muted-foreground">
+                                {formatBoardMoney(col.amount)}
+                              </div>
+                            </div>
+                            <ChevronDown
+                              className={cn(
+                                "size-3.5 text-muted-foreground transition-transform duration-200",
+                                open && "rotate-180",
+                              )}
+                            />
+                          </div>
+                        </button>
+                        {open ? (
+                          <div className="border-t border-[var(--pult-line)]/80 px-3 py-2">
+                            {col.deals.length === 0 ? (
+                              <p className="py-1 text-xs text-muted-foreground">
+                                Нет сделок в этапе
+                              </p>
+                            ) : (
+                              <ul className="space-y-1.5">
+                                {col.deals.map((deal) => (
+                                  <li key={deal.id}>
+                                    <Link
+                                      href="/app/pipeline"
+                                      className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-xs transition-colors hover:bg-white/80"
+                                    >
+                                      <span className="min-w-0 truncate">
+                                        <span className="font-medium text-[var(--pult-ink)]">
+                                          {deal.number}
+                                        </span>
+                                        <span className="text-muted-foreground">
+                                          {" "}
+                                          · {deal.client}
+                                        </span>
+                                      </span>
+                                      <span className="shrink-0 text-muted-foreground">
+                                        {formatBoardMoney(deal.amount)}
+                                      </span>
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </Surface>
+          );
+        })}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
