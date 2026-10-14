@@ -103,7 +103,6 @@ export default function DashboardPage() {
     <div>
       <PageHeader
         title="Обзор"
-        description="Спокойная аналитика салона: деньги, воронка, нагрузка и направления."
         actions={
           <div className="flex flex-wrap gap-2">
             <Button
