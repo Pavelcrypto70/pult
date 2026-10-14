@@ -12,6 +12,7 @@ import {
   Sparkles,
   LogOut,
   Archive,
+  ExternalLink,
 } from "lucide-react";
 import {
   Sidebar,
@@ -42,6 +43,7 @@ type NavItem = {
   icon: React.ComponentType<{ className?: string }>;
   exact?: boolean;
   hint?: string;
+  external?: boolean;
 };
 
 const opsNav: NavItem[] = [
@@ -62,6 +64,13 @@ const opsNav: NavItem[] = [
     hint: "Закрытые · статистика",
   },
   { href: "/app/admin", label: "Админка", icon: Settings2 },
+  {
+    href: "https://шикардорс.рф",
+    label: "На сайт",
+    icon: ExternalLink,
+    hint: "шикардорс.рф",
+    external: true,
+  },
 ];
 
 // Витрина / каталог временно скрыты из меню
@@ -89,7 +98,12 @@ function NavGroup({
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => {
-            const active = isActive(pathname, item);
+            const active = item.external ? false : isActive(pathname, item);
+            const link = item.external ? (
+              <a href={item.href} target="_blank" rel="noreferrer" />
+            ) : (
+              <Link href={item.href} />
+            );
             return (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
@@ -99,7 +113,7 @@ function NavGroup({
                     active && "pult-nav-active font-medium",
                     item.hint && "items-start",
                   )}
-                  render={<Link href={item.href} />}
+                  render={link}
                 >
                   <item.icon className={cn(item.hint && "mt-0.5")} />
                   <span className="flex min-w-0 flex-col gap-0.5">
