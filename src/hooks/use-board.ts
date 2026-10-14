@@ -19,7 +19,7 @@ import {
   uid,
 } from "@/lib/board";
 
-const STORAGE_KEY = "pult-board-v3";
+const STORAGE_KEY = "pult-board-v4";
 
 function loadBoard(): BoardState {
   if (typeof window === "undefined") return createInitialBoardState();
