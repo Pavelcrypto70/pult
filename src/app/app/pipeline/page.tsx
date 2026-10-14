@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   ChevronDown,
+  Columns3,
   GripVertical,
   MessageCircle,
   Phone,
@@ -18,8 +19,10 @@ import { DealDetailDialog } from "@/components/board/deal-detail-dialog";
 import { PageHeader, Surface } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useBoard } from "@/hooks/use-board";
+import { useWorkspace } from "@/hooks/use-workspace";
 import {
   FLAG_LABELS,
   activeCards,
@@ -47,8 +50,10 @@ type DragPayload =
 
 export default function PipelinePage() {
   const board = useBoard();
+  const workspace = useWorkspace();
   const [direction, setDirection] = useState<DirectionId>("fulfillment");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [blocksMenuOpen, setBlocksMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [createBlockId, setCreateBlockId] = useState<string | undefined>();
@@ -72,7 +77,21 @@ export default function PipelinePage() {
   }, []);
 
   const active = board.state.directions.find((d) => d.id === direction)!;
-  const columns = blocksForDirection(board.state.blocks, direction);
+  const allColumns = blocksForDirection(board.state.blocks, direction);
+  const allBlockIds = useMemo(
+    () => allColumns.map((c) => c.id),
+    [allColumns],
+  );
+  const savedVisible = workspace.getVisibleBlockIds(direction);
+  const showingAllBlocks = savedVisible === null;
+  const columns = useMemo(() => {
+    if (savedVisible === null) return allColumns;
+    const allowed = new Set(savedVisible);
+    return allColumns.filter((c) => allowed.has(c.id));
+  }, [allColumns, savedVisible]);
+  const visibleCount = showingAllBlocks
+    ? allColumns.length
+    : columns.length;
 
   const liveCards = useMemo(
     () => activeCards(board.state.cards),
@@ -229,7 +248,7 @@ export default function PipelinePage() {
 
       <Surface className="mb-5 overflow-visible p-3 sm:p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
             <div className="relative min-w-[200px] flex-1 sm:max-w-xs">
               <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -243,7 +262,95 @@ export default function PipelinePage() {
             <div className="relative shrink-0">
               <button
                 type="button"
-                onClick={() => setMenuOpen((v) => !v)}
+                onClick={() => {
+                  setBlocksMenuOpen((v) => !v);
+                  setMenuOpen(false);
+                }}
+                className="inline-flex min-h-11 w-full items-center gap-2 rounded-full border border-[var(--pult-line)] bg-white px-4 py-2.5 text-left transition-shadow hover:shadow-[var(--pult-shadow)] sm:min-w-[220px]"
+              >
+                <Columns3 className="size-4 shrink-0 text-[var(--pult-accent)]" />
+                <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                  {showingAllBlocks
+                    ? "Все блоки"
+                    : `Блоки: ${visibleCount} из ${allColumns.length}`}
+                </span>
+                <ChevronDown
+                  className={cn(
+                    "size-4 shrink-0 text-muted-foreground transition-transform",
+                    blocksMenuOpen && "rotate-180",
+                  )}
+                />
+              </button>
+
+              {blocksMenuOpen ? (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Закрыть список блоков"
+                    className="fixed inset-0 z-20 cursor-default"
+                    onClick={() => setBlocksMenuOpen(false)}
+                  />
+                  <div className="absolute top-[calc(100%+8px)] left-0 z-30 w-[min(100vw-2rem,360px)] overflow-hidden rounded-[1.25rem] border border-[var(--pult-line)] bg-white shadow-[var(--pult-shadow-lg)]">
+                    <div className="border-b border-[var(--pult-line)] px-4 py-3">
+                      <div className="text-xs font-medium text-[var(--pult-ink)]">
+                        Какие блоки показать
+                      </div>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">
+                        Сохраняется для {workspace.currentUser.name}
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 w-full rounded-full"
+                        onClick={() => workspace.showAllBlocks(direction)}
+                      >
+                        Показать все блоки
+                      </Button>
+                    </div>
+                    <div className="max-h-[min(50vh,360px)] overflow-y-auto py-1">
+                      {allColumns.map((col) => {
+                        const checked =
+                          showingAllBlocks ||
+                          Boolean(savedVisible?.includes(col.id));
+                        return (
+                          <label
+                            key={col.id}
+                            className="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-[var(--pult-canvas)]"
+                          >
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={() =>
+                                workspace.toggleVisibleBlock(
+                                  direction,
+                                  col.id,
+                                  allBlockIds,
+                                )
+                              }
+                            />
+                            <span
+                              className="size-2.5 shrink-0 rounded-full"
+                              style={{ background: col.color }}
+                            />
+                            <span className="min-w-0 flex-1 truncate">
+                              {col.title}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              ) : null}
+            </div>
+
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen((v) => !v);
+                  setBlocksMenuOpen(false);
+                }}
                 className="inline-flex min-h-11 w-full items-center gap-2 rounded-full border border-[var(--pult-line)] bg-[linear-gradient(135deg,rgba(11,107,86,0.12),rgba(154,123,79,0.1),rgba(255,255,255,0.95))] px-4 py-2.5 text-left transition-shadow hover:shadow-[var(--pult-shadow)] sm:min-w-[240px]"
               >
                 <SlidersHorizontal className="size-4 shrink-0 text-[var(--pult-accent)]" />
@@ -350,6 +457,22 @@ export default function PipelinePage() {
           })}
         </div>
       </Surface>
+
+      {columns.length === 0 ? (
+        <Surface className="mb-4 px-5 py-10 text-center">
+          <p className="text-sm text-muted-foreground">
+            Нет выбранных блоков. Отметьте этапы в списке слева или нажмите
+            «Показать все блоки».
+          </p>
+          <Button
+            type="button"
+            className="mt-4 rounded-full"
+            onClick={() => workspace.showAllBlocks(direction)}
+          >
+            Показать все блоки
+          </Button>
+        </Surface>
+      ) : null}
 
       <div
         key={direction}
