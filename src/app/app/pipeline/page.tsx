@@ -242,7 +242,21 @@ export default function PipelinePage() {
         }
       />
 
-      <Surface className="mb-5 overflow-visible p-3 sm:p-4">
+      {blocksMenuOpen ? (
+        <button
+          type="button"
+          aria-label="Закрыть список блоков"
+          className="fixed inset-0 z-40 cursor-default"
+          onClick={() => setBlocksMenuOpen(false)}
+        />
+      ) : null}
+
+      <Surface
+        className={cn(
+          "relative mb-5 overflow-visible p-3 sm:p-4",
+          blocksMenuOpen ? "z-50" : "z-20",
+        )}
+      >
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
             <div className="relative shrink-0">
@@ -266,64 +280,56 @@ export default function PipelinePage() {
               </button>
 
               {blocksMenuOpen ? (
-                <>
-                  <button
-                    type="button"
-                    aria-label="Закрыть список блоков"
-                    className="fixed inset-0 z-20 cursor-default"
-                    onClick={() => setBlocksMenuOpen(false)}
-                  />
-                  <div className="absolute top-[calc(100%+8px)] left-0 z-30 w-[min(100vw-2rem,360px)] overflow-hidden rounded-[1.25rem] border border-[var(--pult-line)] bg-white shadow-[var(--pult-shadow-lg)]">
-                    <div className="border-b border-[var(--pult-line)] px-4 py-3">
-                      <div className="text-xs font-medium text-[var(--pult-ink)]">
-                        Какие блоки показать
-                      </div>
-                      <p className="mt-0.5 text-[11px] text-muted-foreground">
-                        Сохраняется для {workspace.currentUser.name}
-                      </p>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="mt-2 w-full rounded-full"
-                        onClick={() => workspace.showAllBlocks(direction)}
-                      >
-                        Показать все блоки
-                      </Button>
+                <div className="absolute top-[calc(100%+8px)] left-0 z-50 w-[min(100vw-2rem,360px)] overflow-hidden rounded-[1.25rem] border border-[var(--pult-line)] bg-white shadow-[var(--pult-shadow-lg)]">
+                  <div className="border-b border-[var(--pult-line)] px-4 py-3">
+                    <div className="text-xs font-medium text-[var(--pult-ink)]">
+                      Какие блоки показать
                     </div>
-                    <div className="max-h-[min(50vh,360px)] overflow-y-auto py-1">
-                      {allColumns.map((col) => {
-                        const checked =
-                          showingAllBlocks ||
-                          Boolean(savedVisible?.includes(col.id));
-                        return (
-                          <label
-                            key={col.id}
-                            className="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-[var(--pult-canvas)]"
-                          >
-                            <Checkbox
-                              checked={checked}
-                              onCheckedChange={() =>
-                                workspace.toggleVisibleBlock(
-                                  direction,
-                                  col.id,
-                                  allBlockIds,
-                                )
-                              }
-                            />
-                            <span
-                              className="size-2.5 shrink-0 rounded-full"
-                              style={{ background: col.color }}
-                            />
-                            <span className="min-w-0 flex-1 truncate">
-                              {col.title}
-                            </span>
-                          </label>
-                        );
-                      })}
-                    </div>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      Сохраняется для {workspace.currentUser.name}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 w-full rounded-full"
+                      onClick={() => workspace.showAllBlocks(direction)}
+                    >
+                      Показать все блоки
+                    </Button>
                   </div>
-                </>
+                  <div className="max-h-[min(50vh,360px)] overflow-y-auto py-1">
+                    {allColumns.map((col) => {
+                      const checked =
+                        showingAllBlocks ||
+                        Boolean(savedVisible?.includes(col.id));
+                      return (
+                        <label
+                          key={col.id}
+                          className="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-[var(--pult-canvas)]"
+                        >
+                          <Checkbox
+                            checked={checked}
+                            onCheckedChange={() =>
+                              workspace.toggleVisibleBlock(
+                                direction,
+                                col.id,
+                                allBlockIds,
+                              )
+                            }
+                          />
+                          <span
+                            className="size-2.5 shrink-0 rounded-full"
+                            style={{ background: col.color }}
+                          />
+                          <span className="min-w-0 flex-1 truncate">
+                            {col.title}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
               ) : null}
             </div>
 
@@ -399,7 +405,7 @@ export default function PipelinePage() {
 
       <div
         key={direction}
-        className="animate-in fade-in slide-in-from-bottom-2 flex gap-3 overflow-x-auto pb-4 duration-300"
+        className="relative z-0 animate-in fade-in slide-in-from-bottom-2 flex gap-3 overflow-x-auto pb-4 duration-300"
       >
         {columns.map((column) => {
           const columnDeals = deals.filter((d) => d.blockId === column.id);
