@@ -163,20 +163,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="rounded-2xl border border-[var(--pult-line)] bg-white/70 p-3 shadow-[var(--pult-shadow)]">
             <div className="mb-3 flex items-center gap-2 text-[11px] tracking-[0.12em] text-muted-foreground uppercase">
               <Sparkles className="size-3.5 text-[var(--pult-gold)]" />
-              Première
+              шикардорс.рф
             </div>
             <div className="flex items-center gap-3">
               <Avatar className="size-9">
                 <AvatarFallback className="bg-[var(--pult-accent-soft)] text-[var(--pult-accent)] text-xs font-semibold">
-                  {user?.initials ?? "ПР"}
+                  {user?.initials === "АК" ? "ПР" : (user?.initials ?? "ПР")}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-medium">
-                  {user?.name ?? "Президент"}
+                  {user?.name === "Анна Крылова"
+                    ? "Президент"
+                    : (user?.name ?? "Президент")}
                 </div>
                 <div className="truncate text-xs text-muted-foreground">
-                  {user ? ROLE_LABELS_AUTH[user.role] : "Владелец"} · Atelier Doors
+                  {user ? ROLE_LABELS_AUTH[user.role] : "Владелец"} · шикардорс.рф
                 </div>
               </div>
             </div>

@@ -43,6 +43,17 @@ export function loadSession(): AuthUser | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as AuthUser;
     if (!parsed?.id || !parsed?.login) return null;
+    // Migrate old demo name from earlier builds
+    if (parsed.name === "Анна Крылова" || parsed.initials === "АК") {
+      const demo = DEMO_ACCOUNTS.find((a) => a.login === "admin")?.user;
+      const next: AuthUser = {
+        ...parsed,
+        name: demo?.name ?? "Президент",
+        initials: demo?.initials ?? "ПР",
+      };
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    }
     return parsed;
   } catch {
     return null;
