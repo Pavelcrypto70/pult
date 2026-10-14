@@ -10,7 +10,6 @@ import {
   Plus,
   Search,
   Settings2,
-  SlidersHorizontal,
 } from "lucide-react";
 import { ArchiveDealDialog } from "@/components/board/archive-deal-dialog";
 import { BoardConstructorDialog } from "@/components/board/board-constructor-dialog";
@@ -52,7 +51,6 @@ export default function PipelinePage() {
   const board = useBoard();
   const workspace = useWorkspace();
   const [direction, setDirection] = useState<DirectionId>("fulfillment");
-  const [menuOpen, setMenuOpen] = useState(false);
   const [blocksMenuOpen, setBlocksMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
@@ -76,7 +74,6 @@ export default function PipelinePage() {
     window.history.replaceState({}, "", next);
   }, []);
 
-  const active = board.state.directions.find((d) => d.id === direction)!;
   const allColumns = blocksForDirection(board.state.blocks, direction);
   const allBlockIds = useMemo(
     () => allColumns.map((c) => c.id),
@@ -252,80 +249,7 @@ export default function PipelinePage() {
             <div className="relative shrink-0">
               <button
                 type="button"
-                onClick={() => {
-                  setMenuOpen((v) => !v);
-                  setBlocksMenuOpen(false);
-                }}
-                className="inline-flex min-h-11 w-full items-center gap-2 rounded-full border border-[var(--pult-line)] bg-[linear-gradient(135deg,rgba(11,107,86,0.12),rgba(154,123,79,0.1),rgba(255,255,255,0.95))] px-4 py-2.5 text-left transition-shadow hover:shadow-[var(--pult-shadow)] sm:min-w-[240px]"
-              >
-                <SlidersHorizontal className="size-4 shrink-0 text-[var(--pult-accent)]" />
-                <span className="min-w-0 flex-1 truncate text-sm font-medium tracking-wide uppercase">
-                  {active.label}
-                </span>
-                <ChevronDown
-                  className={cn(
-                    "size-4 shrink-0 text-muted-foreground transition-transform",
-                    menuOpen && "rotate-180",
-                  )}
-                />
-              </button>
-
-              {menuOpen ? (
-                <>
-                  <button
-                    type="button"
-                    aria-label="Закрыть меню направлений"
-                    className="fixed inset-0 z-20 cursor-default"
-                    onClick={() => setMenuOpen(false)}
-                  />
-                  <div className="absolute top-[calc(100%+8px)] left-0 z-30 w-[min(100vw-2rem,360px)] overflow-hidden rounded-[1.25rem] border border-[var(--pult-line)] bg-white shadow-[var(--pult-shadow-lg)]">
-                    {board.state.directions.map((item) => {
-                      const count = liveCards.filter(
-                        (d) => d.directionId === item.id,
-                      ).length;
-                      const selectedDir = item.id === direction;
-                      return (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => {
-                            setDirection(item.id);
-                            setMenuOpen(false);
-                          }}
-                          className={cn(
-                            "flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left text-sm transition-colors",
-                            selectedDir
-                              ? "bg-[var(--pult-accent-soft)]/70 font-medium text-[var(--pult-ink)]"
-                              : "text-[var(--pult-ink-soft)] hover:bg-[var(--pult-canvas)]",
-                          )}
-                        >
-                          <span className="tracking-[0.04em] uppercase">
-                            {item.label}
-                          </span>
-                          <Badge
-                            variant="secondary"
-                            className={cn(
-                              "rounded-full",
-                              selectedDir && "bg-white text-[var(--pult-accent)]",
-                            )}
-                          >
-                            {count}
-                          </Badge>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </>
-              ) : null}
-            </div>
-
-            <div className="relative shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  setBlocksMenuOpen((v) => !v);
-                  setMenuOpen(false);
-                }}
+                onClick={() => setBlocksMenuOpen((v) => !v)}
                 className="inline-flex min-h-11 w-full items-center gap-2 rounded-full border border-[var(--pult-line)] bg-white px-4 py-2.5 text-left transition-shadow hover:shadow-[var(--pult-shadow)] sm:min-w-[220px]"
               >
                 <Columns3 className="size-4 shrink-0 text-[var(--pult-accent)]" />
