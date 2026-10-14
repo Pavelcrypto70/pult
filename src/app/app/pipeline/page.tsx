@@ -16,7 +16,6 @@ import { BoardConstructorDialog } from "@/components/board/board-constructor-dia
 import { CreateDealDialog } from "@/components/board/create-deal-dialog";
 import { DealDetailDialog } from "@/components/board/deal-detail-dialog";
 import { PageHeader, Surface } from "@/components/layout/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
