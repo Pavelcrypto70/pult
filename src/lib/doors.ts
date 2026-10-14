@@ -204,7 +204,7 @@ export const doorOrders: DoorOrder[] = [
     deposit: 400000,
     measureDate: "2026-09-02",
     installDate: "2026-09-28",
-    manager: "Анна Крылова",
+    manager: "Президент",
     city: "Москва",
   },
   {
@@ -241,7 +241,7 @@ export const doorOrders: DoorOrder[] = [
     deposit: 120000,
     measureDate: "2026-09-05",
     installDate: "2026-09-25",
-    manager: "Анна Крылова",
+    manager: "Президент",
     city: "МО",
   },
   {

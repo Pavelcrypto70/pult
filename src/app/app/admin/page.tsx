@@ -198,7 +198,7 @@ export default function AdminPage() {
         <TabsContent value="audit">
           <Surface className="divide-y divide-[var(--pult-line)]">
             {[
-              "Анна открыла направление «Поставка / Доставка / Монтаж»",
+              "Президент открыл направление «Поставка / Доставка / Монтаж»",
               "Илья обновил статус заказа 546-2026",
               "Павел подключил webhook /api/hooks/deals",
               "Мария выгрузила общий отчёт по салону",

@@ -3,10 +3,10 @@ import type { ActivityItem, Client, Deal, TaskItem, TeamMember } from "./types";
 export const team: TeamMember[] = [
   {
     id: "u1",
-    name: "Анна Крылова",
-    email: "anna@studio.ru",
+    name: "Президент",
+    email: "president@studio.ru",
     role: "owner",
-    initials: "АК",
+    initials: "ПР",
     active: true,
   },
   {

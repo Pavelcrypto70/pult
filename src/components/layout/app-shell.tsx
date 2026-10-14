@@ -168,12 +168,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-3">
               <Avatar className="size-9">
                 <AvatarFallback className="bg-[var(--pult-accent-soft)] text-[var(--pult-accent)] text-xs font-semibold">
-                  {user?.initials ?? "АК"}
+                  {user?.initials ?? "ПР"}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-medium">
-                  {user?.name ?? "Анна Крылова"}
+                  {user?.name ?? "Президент"}
                 </div>
                 <div className="truncate text-xs text-muted-foreground">
                   {user ? ROLE_LABELS_AUTH[user.role] : "Владелец"} · Atelier Doors

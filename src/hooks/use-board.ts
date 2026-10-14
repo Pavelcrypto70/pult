@@ -103,7 +103,7 @@ export function useBoard() {
         }
 
         nextCard = pushHistory(nextCard, {
-          userName: meta.userName ?? "Анна Крылова",
+          userName: meta.userName ?? "Президент",
           kind: meta.kind,
           fromBlockId: card.blockId,
           toBlockId: targetBlockId,
@@ -287,7 +287,7 @@ export function useBoard() {
       setState((prev) => {
         const card = prev.cards.find((c) => c.id === cardId);
         if (!card || isArchived(card)) return prev;
-        const userName = input.userName ?? "Анна Крылова";
+        const userName = input.userName ?? "Президент";
         const archivedAt = new Date().toISOString().slice(0, 10);
         const outcomeLabel = CLOSE_OUTCOME_LABELS[input.closeOutcome];
         const nextCard = pushHistory(
@@ -343,7 +343,7 @@ export function useBoard() {
         const blockId = blockExists ? preferredBlock : dirBlocks[0]?.id;
         if (!blockId) return prev;
 
-        const userName = input?.userName ?? "Анна Крылова";
+        const userName = input?.userName ?? "Президент";
         const nextCard = pushHistory(
           {
             ...card,

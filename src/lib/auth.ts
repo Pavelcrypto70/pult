@@ -19,9 +19,9 @@ export const DEMO_ACCOUNTS: {
     user: {
       id: "u_admin",
       login: "admin",
-      name: "Анна Крылова",
+      name: "Президент",
       role: "admin",
-      initials: "АК",
+      initials: "ПР",
     },
   },
 ];

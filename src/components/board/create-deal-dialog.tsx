@@ -134,7 +134,7 @@ export function CreateDealDialog({
       history: [],
       createdAt: "",
       updatedAt: "",
-      createdBy: "Анна Крылова",
+      createdBy: "Президент",
     };
     const missing = missingRequiredFields(draft, template, "create");
     if (!client.trim()) missing.unshift("Клиент");
