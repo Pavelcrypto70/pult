@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { CalendarRange, ChevronDown } from "lucide-react";
 import {
   SoftDonut,
   SoftGroupedBars,
@@ -12,6 +12,7 @@ import {
 import { PageHeader, StatCard, Surface } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useBoard } from "@/hooks/use-board";
 import {
   activeCards,
@@ -20,17 +21,21 @@ import {
   type DealCard,
 } from "@/lib/board";
 import {
-  DEMO_DIRECTION_SHARE,
-  DEMO_FUNNEL,
-  DEMO_KPI,
-  DEMO_LOAD,
-  DEMO_LOST,
-  DEMO_REVENUE_MLN,
-  DEMO_WEEKS,
-  DEMO_WON,
+  formatRangeLabel,
+  getDemoStatsForRange,
+  parseInputDate,
+  rangeForPreset,
+  toInputDate,
+  type PeriodPreset,
 } from "@/lib/overview-demo";
-import { tasks } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+
+const PERIODS: { id: PeriodPreset; label: string }[] = [
+  { id: "today", label: "Сегодня" },
+  { id: "week", label: "Неделя" },
+  { id: "month", label: "Месяц" },
+  { id: "custom", label: "Период" },
+];
 
 export default function DashboardPage() {
   const board = useBoard();
@@ -39,6 +44,25 @@ export default function DashboardPage() {
     {},
   );
   const [openStages, setOpenStages] = useState<Record<string, boolean>>({});
+  const [period, setPeriod] = useState<PeriodPreset>("month");
+  const [customFrom, setCustomFrom] = useState(() =>
+    toInputDate(rangeForPreset("month").from),
+  );
+  const [customTo, setCustomTo] = useState(() =>
+    toInputDate(rangeForPreset("month").to),
+  );
+
+  const range = useMemo(() => {
+    if (period !== "custom") return rangeForPreset(period);
+    const from = parseInputDate(customFrom);
+    const to = parseInputDate(customTo);
+    return rangeForPreset("custom", {
+      from: from ?? rangeForPreset("month").from,
+      to: to ?? rangeForPreset("month").to,
+    });
+  }, [period, customFrom, customTo]);
+
+  const demo = useMemo(() => getDemoStatsForRange(range), [range]);
 
   const byDirection = useMemo(() => {
     return board.state.directions.map((dir) => {
@@ -58,43 +82,6 @@ export default function DashboardPage() {
       return { ...dir, deals: dirDeals, amount, overdue, urgent, columns };
     });
   }, [board.state.directions, board.state.blocks, live]);
-
-  const loadItems = useMemo(() => {
-    if (live.length === 0) return [...DEMO_LOAD];
-    const map = new Map<string, number>();
-    for (const deal of live) {
-      map.set(deal.owner, (map.get(deal.owner) ?? 0) + 1);
-    }
-    return [...map.entries()]
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-  }, [live]);
-
-  const directionShare = useMemo(() => {
-    if (live.length === 0) return [...DEMO_DIRECTION_SHARE];
-    const total = live.length || 1;
-    const colors: Record<string, string> = {
-      sales: "#0b6b56",
-      fulfillment: "#6a9e8d",
-      warranty: "#9a7b4f",
-    };
-    return board.state.directions.map((d) => ({
-      label: d.short,
-      value: Math.round(
-        (live.filter((c) => c.directionId === d.id).length / total) * 100,
-      ),
-      color: colors[d.id] ?? "#0b6b56",
-    }));
-  }, [board.state.directions, live]);
-
-  const overdueAll =
-    live.length === 0
-      ? DEMO_KPI.overdue
-      : live.filter((d) => d.flags.includes("overdue")).length;
-  const hotTasks = tasks.filter((t) => t.status !== "done");
-  const openTasksCount =
-    live.length === 0 ? DEMO_KPI.openTasks : hotTasks.length;
 
   function toggleDirection(id: string) {
     setOpenDirections((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -136,26 +123,87 @@ export default function DashboardPage() {
         }
       />
 
+      <Surface className="mb-5 p-3 sm:p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-2 text-sm text-[var(--pult-ink-soft)]">
+            <CalendarRange className="size-4 text-[var(--pult-accent)]" />
+            <span className="font-medium">Период статистики</span>
+            <span className="text-xs text-muted-foreground">
+              {formatRangeLabel(range)}
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {PERIODS.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => {
+                  setPeriod(p.id);
+                  if (p.id !== "custom") {
+                    const r = rangeForPreset(p.id);
+                    setCustomFrom(toInputDate(r.from));
+                    setCustomTo(toInputDate(r.to));
+                  }
+                }}
+                className={cn(
+                  "rounded-full px-3.5 py-1.5 text-xs font-medium tracking-wide transition-colors",
+                  period === p.id
+                    ? "bg-[var(--pult-ink)] text-[var(--pult-paper)]"
+                    : "bg-[var(--pult-canvas)] text-muted-foreground hover:text-[var(--pult-ink)]",
+                )}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        {period === "custom" ? (
+          <div className="mt-3 flex flex-wrap items-end gap-3 border-t border-[var(--pult-line)] pt-3">
+            <label className="grid gap-1 text-xs text-muted-foreground">
+              С
+              <Input
+                type="date"
+                value={customFrom}
+                onChange={(e) => setCustomFrom(e.target.value)}
+                className="h-9 w-[160px] rounded-xl bg-white"
+              />
+            </label>
+            <label className="grid gap-1 text-xs text-muted-foreground">
+              По
+              <Input
+                type="date"
+                value={customTo}
+                onChange={(e) => setCustomTo(e.target.value)}
+                className="h-9 w-[160px] rounded-xl bg-white"
+              />
+            </label>
+            <p className="pb-2 text-[11px] text-muted-foreground">
+              Дашборд пересчитает цифры и графики по выбранным датам
+            </p>
+          </div>
+        ) : null}
+      </Surface>
+
       <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Выручка месяца"
-          value={DEMO_KPI.revenueLabel}
-          hint="Демо · закрытые успехи"
+          label="Выручка периода"
+          value={demo.kpi.revenueLabel}
+          hint={`Демо · ${formatRangeLabel(range)}`}
         />
         <StatCard
           label="Конверсия КП→сделка"
-          value={DEMO_KPI.conversionLabel}
-          hint="Демо · за 6 недель"
+          value={demo.kpi.conversionLabel}
+          hint="Демо · по закрытиям периода"
         />
         <StatCard
           label="Просрочек"
-          value={String(overdueAll)}
-          hint={live.length ? "По флагам на досках" : "Демо · сигналы"}
+          value={String(demo.kpi.overdue)}
+          hint="Демо · сигналы периода"
         />
         <StatCard
           label="Открытых задач"
-          value={String(openTasksCount)}
-          hint="По команде"
+          value={String(demo.kpi.openTasks)}
+          hint="Демо · по команде"
         />
       </div>
 
@@ -163,23 +211,27 @@ export default function DashboardPage() {
         <Surface className="p-4 sm:p-5">
           <div className="mb-1 flex items-baseline justify-between gap-2">
             <h2 className="font-[family-name:var(--font-display)] text-base">
-              Выручка по неделям
+              Выручка
             </h2>
-            <span className="text-[11px] text-muted-foreground">млн ₽ · демо</span>
+            <span className="text-[11px] text-muted-foreground">
+              млн ₽ · {demo.chartHint}
+            </span>
           </div>
-          <SoftLineChart values={DEMO_REVENUE_MLN} labels={DEMO_WEEKS} />
+          <SoftLineChart values={demo.revenueMln} labels={demo.labels} />
         </Surface>
         <Surface className="p-4 sm:p-5">
           <div className="mb-1 flex items-baseline justify-between gap-2">
             <h2 className="font-[family-name:var(--font-display)] text-base">
               Успех / отказ
             </h2>
-            <span className="text-[11px] text-muted-foreground">шт. · демо</span>
+            <span className="text-[11px] text-muted-foreground">
+              шт. · {demo.chartHint}
+            </span>
           </div>
           <SoftGroupedBars
-            won={DEMO_WON}
-            lost={DEMO_LOST}
-            labels={DEMO_WEEKS}
+            won={demo.won}
+            lost={demo.lost}
+            labels={demo.labels}
           />
         </Surface>
       </div>
@@ -188,14 +240,16 @@ export default function DashboardPage() {
         <h2 className="font-[family-name:var(--font-display)] text-base">
           Воронка продажи
         </h2>
-        <span className="text-[11px] text-muted-foreground">путь клиента · демо</span>
+        <span className="text-[11px] text-muted-foreground">
+          путь клиента · {formatRangeLabel(range)}
+        </span>
       </div>
       <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {DEMO_FUNNEL.map((step, i) => (
+        {demo.funnel.map((step, i) => (
           <Surface
             key={step.label}
             className="p-4 pult-chart-rise"
-            style={{ animationDelay: `${i * 70}ms` } as React.CSSProperties}
+            style={{ animationDelay: `${i * 70}ms` }}
           >
             <div className="text-[11px] tracking-[0.12em] text-muted-foreground uppercase">
               {i + 1}. {step.label}
@@ -207,8 +261,8 @@ export default function DashboardPage() {
               <div
                 className="h-full rounded-full bg-[var(--pult-accent)] transition-[width] duration-700"
                 style={{
-                  width: `${(step.value / DEMO_FUNNEL[0].value) * 100}%`,
-                  opacity: 0.55 + (i / DEMO_FUNNEL.length) * 0.45,
+                  width: `${(step.value / demo.funnel[0].value) * 100}%`,
+                  opacity: 0.55 + (i / demo.funnel.length) * 0.45,
                 }}
               />
             </div>
@@ -222,22 +276,18 @@ export default function DashboardPage() {
             <h2 className="font-[family-name:var(--font-display)] text-base">
               Нагрузка по ответственным
             </h2>
-            <span className="text-[11px] text-muted-foreground">
-              {live.length ? "с доски" : "демо"} · сделок
-            </span>
+            <span className="text-[11px] text-muted-foreground">демо · сделок</span>
           </div>
-          <SoftHBars items={loadItems} />
+          <SoftHBars items={demo.load} />
         </Surface>
         <Surface className="p-4 sm:p-5">
           <div className="mb-3 flex items-baseline justify-between gap-2">
             <h2 className="font-[family-name:var(--font-display)] text-base">
               Доля направлений
             </h2>
-            <span className="text-[11px] text-muted-foreground">
-              {live.length ? "с доски" : "демо"}
-            </span>
+            <span className="text-[11px] text-muted-foreground">демо</span>
           </div>
-          <SoftDonut slices={directionShare} />
+          <SoftDonut slices={demo.directionShare} />
         </Surface>
       </div>
 
