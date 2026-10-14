@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { AlertTriangle, Archive, CircleDollarSign, Layers3 } from "lucide-react";
+import {
+  AlertTriangle,
+  Archive,
+  ChevronDown,
+  CircleDollarSign,
+  Layers3,
+} from "lucide-react";
 import { PageHeader, StatCard, Surface } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,9 +23,11 @@ import {
   statsForMonth,
   winRate,
   type CardFlag,
+  type DealCard,
 } from "@/lib/board";
 import { activity, tasks } from "@/lib/mock-data";
 import { STATUS_LABELS } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
   const board = useBoard();
@@ -29,6 +37,8 @@ export default function DashboardPage() {
     [board.state.cards],
   );
   const [statsMonth, setStatsMonth] = useState<string>("");
+  /** Open stage dropdowns on overview — key = `${directionId}:${blockId}` */
+  const [openStages, setOpenStages] = useState<Record<string, boolean>>({});
   const selectedMonth =
     statsMonth || months[0] || new Date().toISOString().slice(0, 7);
   const monthStats = useMemo(
@@ -49,11 +59,16 @@ export default function DashboardPage() {
           ...col,
           count: columnDeals.length,
           amount: columnDeals.reduce((sum, d) => sum + d.amount, 0),
+          deals: columnDeals as DealCard[],
         };
       });
       return { ...dir, deals: dirDeals, amount, overdue, urgent, columns };
     });
   }, [board.state.directions, board.state.blocks, live]);
+
+  function toggleStage(key: string) {
+    setOpenStages((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
 
   const totalDeals = live.length;
   const totalAmount = live.reduce((sum, d) => sum + d.amount, 0);
@@ -205,24 +220,80 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="space-y-2 p-4">
-              {dir.columns.map((col) => (
-                <div
-                  key={col.id}
-                  className="flex items-center justify-between gap-3 rounded-xl bg-[var(--pult-canvas)]/70 px-3 py-2"
-                >
-                  <div className="flex min-w-0 items-center gap-2">
-                    <span
-                      className="size-2.5 shrink-0 rounded-full"
-                      style={{ background: col.color }}
-                    />
-                    <span className="truncate text-xs font-medium">{col.title}</span>
+              {dir.columns.map((col) => {
+                const stageKey = `${dir.id}:${col.id}`;
+                const open = Boolean(openStages[stageKey]);
+                return (
+                  <div
+                    key={col.id}
+                    className="overflow-hidden rounded-xl bg-[var(--pult-canvas)]/70"
+                  >
+                    <button
+                      type="button"
+                      aria-expanded={open}
+                      onClick={() => toggleStage(stageKey)}
+                      className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left transition-colors hover:bg-black/[0.03]"
+                    >
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span
+                          className="size-2.5 shrink-0 rounded-full"
+                          style={{ background: col.color }}
+                        />
+                        <span className="truncate text-xs font-medium">
+                          {col.title}
+                        </span>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2 text-xs">
+                        <div className="text-right">
+                          <div className="font-medium">{col.count}</div>
+                          <div className="text-muted-foreground">
+                            {formatBoardMoney(col.amount)}
+                          </div>
+                        </div>
+                        <ChevronDown
+                          className={cn(
+                            "size-3.5 text-muted-foreground transition-transform duration-200",
+                            open && "rotate-180",
+                          )}
+                        />
+                      </div>
+                    </button>
+                    {open ? (
+                      <div className="border-t border-[var(--pult-line)]/80 px-3 py-2">
+                        {col.deals.length === 0 ? (
+                          <p className="py-1 text-xs text-muted-foreground">
+                            Нет сделок в этапе
+                          </p>
+                        ) : (
+                          <ul className="space-y-1.5">
+                            {col.deals.map((deal) => (
+                              <li key={deal.id}>
+                                <Link
+                                  href="/app/pipeline"
+                                  className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-xs transition-colors hover:bg-white/80"
+                                >
+                                  <span className="min-w-0 truncate">
+                                    <span className="font-medium text-[var(--pult-ink)]">
+                                      {deal.number}
+                                    </span>
+                                    <span className="text-muted-foreground">
+                                      {" "}
+                                      · {deal.client}
+                                    </span>
+                                  </span>
+                                  <span className="shrink-0 text-muted-foreground">
+                                    {formatBoardMoney(deal.amount)}
+                                  </span>
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ) : null}
                   </div>
-                  <div className="shrink-0 text-right text-xs">
-                    <div className="font-medium">{col.count}</div>
-                    <div className="text-muted-foreground">{formatBoardMoney(col.amount)}</div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </Surface>
         ))}
